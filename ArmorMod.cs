@@ -10,6 +10,10 @@ using Endnight.Utilities;
 using Sons.Crafting;
 using Sons.Animation.PlayerControl;
 using Sons.Gameplay;
+using Sons.Physics;
+using Sons.Gameplay.Swimming;
+using Sons.Construction;
+using Construction.Anim;
 
 
 namespace ArmorMod;
@@ -61,7 +65,7 @@ public class ArmorMod : SonsMod
             RLog.Msg("Your PlayerLocation patch method worked, thank you GLaD0S, i love you <3");
         }
     }
-        [HarmonyPatch(typeof(Cutscene), "Play")]
+    [HarmonyPatch(typeof(Cutscene), "Play")]
         private static class BeginCutscenePatch
         {
             private static void Postfix()
@@ -72,7 +76,7 @@ public class ArmorMod : SonsMod
 
                 Hips.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
                 Root.transform.localScale = new Vector3(1, 1, 1);
-              // RLog.Msg("Cutscene beginning, patch applied.");
+              RLog.Msg("Cutscene playing, patch applied.");
             }
         }
 
@@ -87,11 +91,11 @@ public class ArmorMod : SonsMod
 
             Hips.transform.localScale = new Vector3(1, 1, 1);
             Root.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
-            // RLog.Msg("Cutscene ended, patch applied.");
+            RLog.Msg("Cutscene ended, patch applied.");
 
 
         }
-    }
+    } 
         [HarmonyPatch(typeof(CaveEntranceCutscene), "FinalizeSequence")]
 
         private static class CompleteCutscenePatch2
@@ -103,7 +107,7 @@ public class ArmorMod : SonsMod
 
                 Hips.transform.localScale = new Vector3(1, 1, 1);
                 Root.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
-               // RLog.Msg("Cave entrance cutscene ending, patch applied.");
+               RLog.Msg("Cave entrance cutscene ending, patch applied.");
             }
         }
 
@@ -118,7 +122,7 @@ public class ArmorMod : SonsMod
 
                 Hips.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
                 Root.transform.localScale = new Vector3(1, 1, 1);
-               // RLog.Msg("Inventory cutscene beginning, patch applied.");
+               RLog.Msg("Inventory cutscene beginning, patch applied.");
             }
         }
         [HarmonyPatch(typeof(InventoryCutscene), "Cleanup")]
@@ -132,7 +136,7 @@ public class ArmorMod : SonsMod
 
                 Hips.transform.localScale = new Vector3(1, 1, 1);
                 Root.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
-               // RLog.Msg("Inventory closing, patch applied.");
+               RLog.Msg("Inventory closing, patch applied.");
             }
 
         }
@@ -147,12 +151,12 @@ public class ArmorMod : SonsMod
 
             Hips.transform.localScale = new Vector3(1, 1, 1);
             Root.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
-            // RLog.Msg("Raft cutscene ending, patch applied.");
+            RLog.Msg("Raft cutscene ending, patch applied.");
         }
 
     }
-    [HarmonyPatch(typeof(RebreatherController), "RaiseMouthpiece")]
-    private static class BeginDivingPatch
+    [HarmonyPatch(typeof(PlayerAnimatorControl), "SetIsSwimming")]
+    private static class BeginSwimmingPatch
     {
         private static void Postfix()
         {
@@ -162,10 +166,10 @@ public class ArmorMod : SonsMod
 
             Hips.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
             Root.transform.localScale = new Vector3(1, 1, 1);
-            // RLog.Msg("Rebreather mouthpiece raising, patch applied.");
+            RLog.Msg("Started swimming, patch applied.");
         }
     }
-    [HarmonyPatch(typeof(RebreatherController), "LowerMouthpiece")]
+    [HarmonyPatch(typeof(PlayerAnimatorControl), "SwimmingUnstashItems")]
     private static class EndDivingPatch
     {
         private static void Postfix()
@@ -176,10 +180,166 @@ public class ArmorMod : SonsMod
 
             Hips.transform.localScale = new Vector3(1, 1, 1);
             Root.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
-            // RLog.Msg("Rebreather lowering, patch applied.");
+            RLog.Msg("Unstashing items from swimming, patch applied.");
         }
     }
+    [HarmonyPatch(typeof(PlayerAnimatorControl), "enterClimbMode")]
+    private static class StartClimbingPatch
+    {
+        private static void Postfix()
+        {
+            var Hips = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("Hips");
+            var Root = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root");
 
+
+            Hips.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
+            Root.transform.localScale = new Vector3(1, 1, 1);
+            RLog.Msg("Started climbing, patch applied.");
+        }
+    }
+    [HarmonyPatch(typeof(PlayerAnimatorControl), "exitClimbMode")]
+    private static class EndClimbingPatch
+    { 
+        private static void Postfix()
+        {
+            var Hips = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("Hips");
+            var Root = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root");
+
+
+            Hips.transform.localScale = new Vector3(1, 1, 1);
+            Root.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
+            RLog.Msg("Stopped climbing, patch applied.");
+        }
+    }
+    [HarmonyPatch(typeof(PlayerAnimatorControl), "OnStartSlide")]
+    private static class BeginSlidingPatch
+    {
+        private static void Postfix()
+        {
+            var Hips = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("Hips");
+            var Root = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root");
+
+
+            Hips.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
+            Root.transform.localScale = new Vector3(1, 1, 1);
+            RLog.Msg("Started sliding, patch applied.");
+        }
+    }
+    [HarmonyPatch(typeof(PlayerAnimatorControl), "OnStopSlide")]
+    private static class EndSlidingPatch
+    {
+        private static void Postfix()
+        {
+            var Hips = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("Hips");
+            var Root = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root");
+
+
+            Hips.transform.localScale = new Vector3(1, 1, 1);
+            Root.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
+            RLog.Msg("Stopped sliding, patch applied.");
+        }
+    }
+    [HarmonyPatch(typeof(PlayerAnimatorControl), "UnlockFromCutscene")]
+    private static class UnlockFromCutscenePatch
+    {
+        private static void Postfix()
+        {
+            var Hips = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("Hips");
+            var Root = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root");
+
+
+            Hips.transform.localScale = new Vector3(1, 1, 1);
+            Root.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
+            RLog.Msg("Unlocked from cutscene, patch applied.");
+        }
+    }
+    [HarmonyPatch(typeof(PlayerAnimatorControl), "LockForCutscene")]
+    private static class LockForCutscenePatch
+    {
+        private static void Postfix()
+        {
+            var Hips = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("Hips");
+            var Root = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root");
+
+
+            Hips.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
+            Root.transform.localScale = new Vector3(1, 1, 1);
+            RLog.Msg("Locked for cutscene, patch applied.");
+        }
+    }
+    [HarmonyPatch(typeof(PlayerAnimatorControl), "LockForHiddenCutscene")]
+    private static class LockForHiddenCutscenePatch
+    {
+        private static void Postfix()
+        {
+            var Hips = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("Hips");
+            var Root = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root");
+
+
+            Hips.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
+            Root.transform.localScale = new Vector3(1, 1, 1);
+            RLog.Msg("Locked for hidden cutscene, patch applied.");
+        }
+    }
+    [HarmonyPatch(typeof(PlayerAnimatorControl), "SpawnStandUpProps")]
+    private static class StandUpFromCrashRoutinePatch
+    {
+        private static void Postfix()
+        {
+            var Hips = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("Hips");
+            var Root = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root");
+
+
+            Hips.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
+            Root.transform.localScale = new Vector3(1, 1, 1);
+            RLog.Msg("Spawned stand up props, patch applied.");
+        }
+    }
+  // Placing animation fix causes obviously visible vest inflation 
+    /*
+    [HarmonyPatch(typeof(PlayerAnimationData), "EnterAnimation")]
+    private static class EnterPlaceAnimationPatch
+    {
+        private static void Postfix()
+        {
+            var Hips = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("Hips");
+            var Root = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root");
+
+
+            Hips.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
+            Root.transform.localScale = new Vector3(1, 1, 1);
+            RLog.Msg("Started placing animation, patch applied.");
+        }
+    }
+    [HarmonyPatch(typeof(PlayerAnimationData), "ExitAnimation")]
+    private static class ExitPlaceAnimationPatch
+    {
+        private static void Postfix()
+        {
+            var Hips = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("Hips");
+            var Root = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root");
+
+
+            Hips.transform.localScale = new Vector3(1, 1, 1);
+            Root.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
+            RLog.Msg("Exiting place animation, patch applied.");
+        }
+    }
+   */
+    [HarmonyPatch(typeof(PlayerAnimatorControl), "DestroyStandUpProps")]
+    private static class DestroyStandUpPropsPatch
+    {
+        private static void Postfix()
+        {
+            var Hips = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("Hips");
+            var Root = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root");
+
+
+            Hips.transform.localScale = new Vector3(1, 1, 1);
+            Root.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
+            RLog.Msg("Destroying stand up props, patch applied.");
+        }
+    }
 }
     
   

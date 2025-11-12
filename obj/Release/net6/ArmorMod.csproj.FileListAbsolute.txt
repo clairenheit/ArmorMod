@@ -179,3 +179,4 @@ C:\Users\fired\Desktop\SOTF Modding\ArmorMod\obj\Release\net6\ArmorMod.dll
 C:\Users\fired\Desktop\SOTF Modding\ArmorMod\obj\Release\net6\refint\ArmorMod.dll
 C:\Users\fired\Desktop\SOTF Modding\ArmorMod\obj\Release\net6\ArmorMod.pdb
 C:\Users\fired\Desktop\SOTF Modding\ArmorMod\obj\Release\net6\ref\ArmorMod.dll
+C:\Users\fired\Desktop\SOTF Modding\ArmorMod\obj\Release\net6\ArmorMod.sourcelink.json

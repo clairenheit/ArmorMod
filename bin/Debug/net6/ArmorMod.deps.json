@@ -24,6 +24,7 @@
           "Sons.Gui": "0.0.0.0",
           "Sons.Item": "0.0.0.0",
           "Sons.Multiplayer": "0.0.0.0",
+          "Sons.Physics": "0.0.0.0",
           "SonsSdk": "0.8.6.0",
           "UnityEngine.AnimationModule": "0.0.0.0",
           "UnityEngine.AssetBundleModule": "0.0.0.0",
@@ -162,6 +163,14 @@
       "Sons.Multiplayer/0.0.0.0": {
         "runtime": {
           "Sons.Multiplayer.dll": {
+            "assemblyVersion": "0.0.0.0",
+            "fileVersion": "0.0.0.0"
+          }
+        }
+      },
+      "Sons.Physics/0.0.0.0": {
+        "runtime": {
+          "Sons.Physics.dll": {
             "assemblyVersion": "0.0.0.0",
             "fileVersion": "0.0.0.0"
           }
@@ -498,14 +507,6 @@
       "Sons.Gameplay.LevelProps/0.0.0.0": {
         "runtime": {
           "Sons.Gameplay.LevelProps.dll": {
-            "assemblyVersion": "0.0.0.0",
-            "fileVersion": "0.0.0.0"
-          }
-        }
-      },
-      "Sons.Physics/0.0.0.0": {
-        "runtime": {
-          "Sons.Physics.dll": {
             "assemblyVersion": "0.0.0.0",
             "fileVersion": "0.0.0.0"
           }
@@ -927,6 +928,14 @@
           }
         }
       },
+      "Crest/0.0.0.0": {
+        "runtime": {
+          "Crest.dll": {
+            "assemblyVersion": "0.0.0.0",
+            "fileVersion": "0.0.0.0"
+          }
+        }
+      },
       "GLTF/0.8.6.0": {
         "runtime": {
           "GLTF.dll": {
@@ -1050,14 +1059,6 @@
       "UnityEngine.XRModule/0.0.0.0": {
         "runtime": {
           "UnityEngine.XRModule.dll": {
-            "assemblyVersion": "0.0.0.0",
-            "fileVersion": "0.0.0.0"
-          }
-        }
-      },
-      "Crest/0.0.0.0": {
-        "runtime": {
-          "Crest.dll": {
             "assemblyVersion": "0.0.0.0",
             "fileVersion": "0.0.0.0"
           }
@@ -1415,6 +1416,11 @@
       "serviceable": false,
       "sha512": ""
     },
+    "Sons.Physics/0.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
     "SonsSdk/0.8.6.0": {
       "type": "reference",
       "serviceable": false,
@@ -1621,11 +1627,6 @@
       "sha512": ""
     },
     "Sons.Gameplay.LevelProps/0.0.0.0": {
-      "type": "reference",
-      "serviceable": false,
-      "sha512": ""
-    },
-    "Sons.Physics/0.0.0.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""
@@ -1890,6 +1891,11 @@
       "serviceable": false,
       "sha512": ""
     },
+    "Crest/0.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
     "GLTF/0.8.6.0": {
       "type": "reference",
       "serviceable": false,
@@ -1966,11 +1972,6 @@
       "sha512": ""
     },
     "UnityEngine.XRModule/0.0.0.0": {
-      "type": "reference",
-      "serviceable": false,
-      "sha512": ""
-    },
-    "Crest/0.0.0.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""
