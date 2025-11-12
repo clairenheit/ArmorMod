@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "Om9yM+GScSk=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\fired\\Desktop\\SOTF Modding\\ArmorMod\\ArmorMod.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\fired\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\6.0.36\\microsoft.windowsdesktop.app.ref.6.0.36.nupkg.sha512",
+    "C:\\Users\\fired\\.nuget\\packages\\microsoft.netcore.app.ref\\6.0.36\\microsoft.netcore.app.ref.6.0.36.nupkg.sha512",
+    "C:\\Users\\fired\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\6.0.36\\microsoft.aspnetcore.app.ref.6.0.36.nupkg.sha512"
+  ],
+  "logs": []
+}
