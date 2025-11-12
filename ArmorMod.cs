@@ -76,7 +76,7 @@ public class ArmorMod : SonsMod
 
                 Hips.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
                 Root.transform.localScale = new Vector3(1, 1, 1);
-              RLog.Msg("Cutscene playing, patch applied.");
+              //RLog.Msg("Cutscene playing, patch applied.");
             }
         }
 
@@ -91,7 +91,7 @@ public class ArmorMod : SonsMod
 
             Hips.transform.localScale = new Vector3(1, 1, 1);
             Root.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
-            RLog.Msg("Cutscene ended, patch applied.");
+            //RLog.Msg("Cutscene ended, patch applied.");
 
 
         }
@@ -107,7 +107,7 @@ public class ArmorMod : SonsMod
 
                 Hips.transform.localScale = new Vector3(1, 1, 1);
                 Root.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
-               RLog.Msg("Cave entrance cutscene ending, patch applied.");
+               //RLog.Msg("Cave entrance cutscene ending, patch applied.");
             }
         }
 
@@ -122,7 +122,7 @@ public class ArmorMod : SonsMod
 
                 Hips.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
                 Root.transform.localScale = new Vector3(1, 1, 1);
-               RLog.Msg("Inventory cutscene beginning, patch applied.");
+               //RLog.Msg("Inventory cutscene beginning, patch applied.");
             }
         }
         [HarmonyPatch(typeof(InventoryCutscene), "Cleanup")]
@@ -136,7 +136,7 @@ public class ArmorMod : SonsMod
 
                 Hips.transform.localScale = new Vector3(1, 1, 1);
                 Root.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
-               RLog.Msg("Inventory closing, patch applied.");
+               //RLog.Msg("Inventory closing, patch applied.");
             }
 
         }
@@ -151,7 +151,7 @@ public class ArmorMod : SonsMod
 
             Hips.transform.localScale = new Vector3(1, 1, 1);
             Root.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
-            RLog.Msg("Raft cutscene ending, patch applied.");
+            //RLog.Msg("Raft cutscene ending, patch applied.");
         }
 
     }
@@ -166,7 +166,7 @@ public class ArmorMod : SonsMod
 
             Hips.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
             Root.transform.localScale = new Vector3(1, 1, 1);
-            RLog.Msg("Started swimming, patch applied.");
+            //RLog.Msg("Started swimming, patch applied.");
         }
     }
     [HarmonyPatch(typeof(PlayerAnimatorControl), "SwimmingUnstashItems")]
@@ -180,7 +180,7 @@ public class ArmorMod : SonsMod
 
             Hips.transform.localScale = new Vector3(1, 1, 1);
             Root.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
-            RLog.Msg("Unstashing items from swimming, patch applied.");
+            //RLog.Msg("Unstashing items from swimming, patch applied.");
         }
     }
     [HarmonyPatch(typeof(PlayerAnimatorControl), "enterClimbMode")]
@@ -194,7 +194,7 @@ public class ArmorMod : SonsMod
 
             Hips.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
             Root.transform.localScale = new Vector3(1, 1, 1);
-            RLog.Msg("Started climbing, patch applied.");
+            //RLog.Msg("Started climbing, patch applied.");
         }
     }
     [HarmonyPatch(typeof(PlayerAnimatorControl), "exitClimbMode")]
@@ -208,7 +208,7 @@ public class ArmorMod : SonsMod
 
             Hips.transform.localScale = new Vector3(1, 1, 1);
             Root.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
-            RLog.Msg("Stopped climbing, patch applied.");
+            //RLog.Msg("Stopped climbing, patch applied.");
         }
     }
     [HarmonyPatch(typeof(PlayerAnimatorControl), "OnStartSlide")]
@@ -222,7 +222,7 @@ public class ArmorMod : SonsMod
 
             Hips.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
             Root.transform.localScale = new Vector3(1, 1, 1);
-            RLog.Msg("Started sliding, patch applied.");
+            //RLog.Msg("Started sliding, patch applied.");
         }
     }
     [HarmonyPatch(typeof(PlayerAnimatorControl), "OnStopSlide")]
@@ -236,7 +236,7 @@ public class ArmorMod : SonsMod
 
             Hips.transform.localScale = new Vector3(1, 1, 1);
             Root.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
-            RLog.Msg("Stopped sliding, patch applied.");
+            //RLog.Msg("Stopped sliding, patch applied.");
         }
     }
     [HarmonyPatch(typeof(PlayerAnimatorControl), "UnlockFromCutscene")]
@@ -250,7 +250,7 @@ public class ArmorMod : SonsMod
 
             Hips.transform.localScale = new Vector3(1, 1, 1);
             Root.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
-            RLog.Msg("Unlocked from cutscene, patch applied.");
+            //RLog.Msg("Unlocked from cutscene, patch applied.");
         }
     }
     [HarmonyPatch(typeof(PlayerAnimatorControl), "LockForCutscene")]
@@ -264,7 +264,7 @@ public class ArmorMod : SonsMod
 
             Hips.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
             Root.transform.localScale = new Vector3(1, 1, 1);
-            RLog.Msg("Locked for cutscene, patch applied.");
+            //RLog.Msg("Locked for cutscene, patch applied.");
         }
     }
     [HarmonyPatch(typeof(PlayerAnimatorControl), "LockForHiddenCutscene")]
@@ -278,7 +278,7 @@ public class ArmorMod : SonsMod
 
             Hips.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
             Root.transform.localScale = new Vector3(1, 1, 1);
-            RLog.Msg("Locked for hidden cutscene, patch applied.");
+            //RLog.Msg("Locked for hidden cutscene, patch applied.");
         }
     }
     [HarmonyPatch(typeof(PlayerAnimatorControl), "SpawnStandUpProps")]
@@ -292,7 +292,7 @@ public class ArmorMod : SonsMod
 
             Hips.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
             Root.transform.localScale = new Vector3(1, 1, 1);
-            RLog.Msg("Spawned stand up props, patch applied.");
+            //RLog.Msg("Spawned stand up props, patch applied.");
         }
     }
   // Placing animation fix causes obviously visible vest inflation 
@@ -308,7 +308,7 @@ public class ArmorMod : SonsMod
 
             Hips.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
             Root.transform.localScale = new Vector3(1, 1, 1);
-            RLog.Msg("Started placing animation, patch applied.");
+            //RLog.Msg("Started placing animation, patch applied.");
         }
     }
     [HarmonyPatch(typeof(PlayerAnimationData), "ExitAnimation")]
@@ -322,7 +322,7 @@ public class ArmorMod : SonsMod
 
             Hips.transform.localScale = new Vector3(1, 1, 1);
             Root.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
-            RLog.Msg("Exiting place animation, patch applied.");
+            //RLog.Msg("Exiting place animation, patch applied.");
         }
     }
    */
@@ -337,7 +337,7 @@ public class ArmorMod : SonsMod
 
             Hips.transform.localScale = new Vector3(1, 1, 1);
             Root.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
-            RLog.Msg("Destroying stand up props, patch applied.");
+            //RLog.Msg("Destroying stand up props, patch applied.");
         }
     }
 }
