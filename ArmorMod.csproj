@@ -27,6 +27,9 @@
       <Reference Include="Endnight">
           <HintPath>$(GameDir)\_RedLoader\Game\Endnight.dll</HintPath>
       </Reference>
+      <Reference Include="Sons.Ai.Vail">
+        <HintPath>D:\SteamLibrary\steamapps\common\Sons Of The Forest\_Redloader\Game\Sons.Ai.Vail.dll</HintPath>
+      </Reference>
       <Reference Include="Sons.Physics">
         <HintPath>D:\SteamLibrary\steamapps\common\Sons Of The Forest\_Redloader\Game\Sons.Physics.dll</HintPath>
       </Reference>

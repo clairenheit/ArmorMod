@@ -18,6 +18,7 @@
           "Il2CppInterop.Runtime": "1.4.6.0",
           "Il2Cppmscorlib": "4.0.0.0",
           "RedLoader": "0.8.6.0",
+          "Sons.Ai.Vail": "0.0.0.0",
           "Sons.Construction": "0.0.0.0",
           "Sons.Construction.Utils": "0.0.0.0",
           "Sons": "0.0.0.0",
@@ -117,6 +118,14 @@
           "RedLoader.dll": {
             "assemblyVersion": "0.8.6.0",
             "fileVersion": "0.8.6.0"
+          }
+        }
+      },
+      "Sons.Ai.Vail/0.0.0.0": {
+        "runtime": {
+          "Sons.Ai.Vail.dll": {
+            "assemblyVersion": "0.0.0.0",
+            "fileVersion": "0.0.0.0"
           }
         }
       },
@@ -373,14 +382,6 @@
           "Il2CppInterop.HarmonySupport.dll": {
             "assemblyVersion": "1.4.6.0",
             "fileVersion": "1.4.6.0"
-          }
-        }
-      },
-      "Sons.Ai.Vail/0.0.0.0": {
-        "runtime": {
-          "Sons.Ai.Vail.dll": {
-            "assemblyVersion": "0.0.0.0",
-            "fileVersion": "0.0.0.0"
           }
         }
       },
@@ -928,6 +929,22 @@
           }
         }
       },
+      "Sons.Animation.Mae/0.0.0.0": {
+        "runtime": {
+          "Sons.Animation.Mae.dll": {
+            "assemblyVersion": "0.0.0.0",
+            "fileVersion": "0.0.0.0"
+          }
+        }
+      },
+      "Sons.Ragdoll/0.0.0.0": {
+        "runtime": {
+          "Sons.Ragdoll.dll": {
+            "assemblyVersion": "0.0.0.0",
+            "fileVersion": "0.0.0.0"
+          }
+        }
+      },
       "Crest/0.0.0.0": {
         "runtime": {
           "Crest.dll": {
@@ -1037,22 +1054,6 @@
           "AssetRipper.CIL.dll": {
             "assemblyVersion": "1.1.2.0",
             "fileVersion": "1.1.2.0"
-          }
-        }
-      },
-      "Sons.Animation.Mae/0.0.0.0": {
-        "runtime": {
-          "Sons.Animation.Mae.dll": {
-            "assemblyVersion": "0.0.0.0",
-            "fileVersion": "0.0.0.0"
-          }
-        }
-      },
-      "Sons.Ragdoll/0.0.0.0": {
-        "runtime": {
-          "Sons.Ragdoll.dll": {
-            "assemblyVersion": "0.0.0.0",
-            "fileVersion": "0.0.0.0"
           }
         }
       },
@@ -1386,6 +1387,11 @@
       "serviceable": false,
       "sha512": ""
     },
+    "Sons.Ai.Vail/0.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
     "Sons.Construction/0.0.0.0": {
       "type": "reference",
       "serviceable": false,
@@ -1542,11 +1548,6 @@
       "sha512": ""
     },
     "Il2CppInterop.HarmonySupport/1.4.6.0": {
-      "type": "reference",
-      "serviceable": false,
-      "sha512": ""
-    },
-    "Sons.Ai.Vail/0.0.0.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""
@@ -1891,6 +1892,16 @@
       "serviceable": false,
       "sha512": ""
     },
+    "Sons.Animation.Mae/0.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Sons.Ragdoll/0.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
     "Crest/0.0.0.0": {
       "type": "reference",
       "serviceable": false,
@@ -1957,16 +1968,6 @@
       "sha512": ""
     },
     "AssetRipper.CIL/1.1.2.0": {
-      "type": "reference",
-      "serviceable": false,
-      "sha512": ""
-    },
-    "Sons.Animation.Mae/0.0.0.0": {
-      "type": "reference",
-      "serviceable": false,
-      "sha512": ""
-    },
-    "Sons.Ragdoll/0.0.0.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""

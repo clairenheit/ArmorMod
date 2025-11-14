@@ -1,20 +1,16 @@
 ﻿using UnityEngine;
 using TheForest.Utils;
 using SonsSdk;
-using Sons;
 using Sons.Cutscenes;
-using Sons.Multiplayer.Client;
 using HarmonyLib;
 using RedLoader;
 using Endnight.Utilities;
-using Sons.Crafting;
 using Sons.Animation.PlayerControl;
-using Sons.Gameplay;
-using Sons.Physics;
-using Sons.Gameplay.Swimming;
-using Sons.Construction;
-using Construction.Anim;
+using Sons.Ai.Vail;
+using UnityEngine.SceneManagement;
+using SUI;
 
+// Commented code is either elevated logging or nonfunctional code left for later
 
 namespace ArmorMod;
 
@@ -33,12 +29,47 @@ public class ArmorMod : SonsMod
 
     protected override void OnSdkInitialized()
     { 
+        SettingsRegistry.CreateSettings(this, null, typeof(Config));
     }
 
     public GameObject[] PlayerNets;
-
+    public static Material HelmetMaterial;
+    public static GameObject Hair;
     protected override void OnGameStart()
     {
+        UnityEngine.SceneManagement.Scene SonsStorySpots = SceneManager.GetSceneByName("SonsStorySpots");
+        if (SonsStorySpots.IsValid() == false)
+        {
+            RLog.Msg("Failed to find SonsStorySpots Scene!");
+            return;
+        }
+        Array SonsStorySpotsObjects = SonsStorySpots.GetRootGameObjects();
+
+        foreach (GameObject PossibleStickPickup in SonsStorySpotsObjects)
+        {
+            if (PossibleStickPickup.name == "HelmetStickPickup")
+            {
+                RLog.Msg("Found helmet stick pickup object");
+                MeshRenderer HelmetRenderer = PossibleStickPickup.GetComponentInChildren<MeshRenderer>();
+                if (HelmetRenderer)
+                {
+                    RLog.Msg("Found mesh renderer");
+                    HelmetMaterial = HelmetRenderer.sharedMaterial;
+                }
+               else
+                {
+                    RLog.Msg("Failed to find mesh renderer");
+                }
+                if (HelmetMaterial)
+                {
+                    RLog.Msg("Found Helmet Material");
+                }
+                else
+                {
+                    RLog.Msg("Failed to find Helmet Material");
+                }
+            }
+        }
     }
     [HarmonyPatch(typeof(PlayerLocation), "OnEnable")]
     private static class RemoteSetupPatch
@@ -57,13 +88,56 @@ public class ArmorMod : SonsMod
             OldSkin.transform.Find("tacti_boots1")?.gameObject.SetActive(false);
             OldSkin.transform.Find("tacti_eyes1")?.gameObject.SetActive(false);
             OldSkin.transform.Find("tacti_head1")?.gameObject.SetActive(false);
-            OldSkin.transform.Find("tacti_hemlet1")?.gameObject.SetActive(false);
+            OldSkin.transform.Find("tacti_hemlet1")?.gameObject.SetActive(true);
             OldSkin.transform.Find("tacti_jacket1")?.gameObject.SetActive(false);
             OldSkin.transform.Find("tacti_mask1")?.gameObject.SetActive(false);
             OldSkin.transform.Find("tacti_pants1")?.gameObject.SetActive(false);
             OldSkin.transform.Find("tacti_sunglasses1")?.gameObject.SetActive(false);
             RLog.Msg("Your PlayerLocation patch method worked, thank you GLaD0S, i love you <3");
         }
+    }
+    [HarmonyPatch(typeof(PlayerLocation), "OnEnable")]
+    private static class HelmetPatch
+    {
+        private static void Postfix(PlayerLocation __instance)
+        {
+            var RobbyRenderer = ActorTools.GetPrefab(VailActorTypeId.Robby).gameObject.transform.Find("VisualRoot").transform.Find("RobbyRig").transform.Find("GEO").transform.Find("TacticalArmorHeadHelmetMesh").gameObject.GetComponent<SkinnedMeshRenderer>();
+            // var Hair = __instance.transform.FindDeepChild("Hair");
+            
+            var OldSkin = __instance.transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("OldSkin");
+            var Hemlet = __instance.transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("OldSkin").transform.Find("tacti_hemlet1");
+            var HemletRenderer = Hemlet.GetComponent<SkinnedMeshRenderer>();
+            // var newHemletBones = new Transform[4]; 
+           
+            if (__instance.gameObject != LocalPlayer.GameObject)
+            {
+                if (Config.enableHelmet.Value == true)
+                {
+                    HemletRenderer.enabled = true;
+                    HemletRenderer.castShadows = true;
+                   /* if (Hair != null)
+                    {
+                        Hair.gameObject.SetActive(false);
+                    }
+                    else 
+                    {
+                        RLog.Msg("Hair object not found!");
+                    } 
+                   */
+                    if (Config.cutsceneHelmet.Value == true)
+                    {
+                        HemletRenderer.sharedMesh = RobbyRenderer.sharedMesh;
+                        HemletRenderer.sharedMaterial = HelmetMaterial;
+                        /*  newHemletBones[0] = HemletRenderer.bones[0];
+                          newHemletBones[1] = HemletRenderer.bones[2];
+                          newHemletBones[2] = HemletRenderer.bones[3];
+                          newHemletBones[3] = HemletRenderer.bones[4];
+                          HemletRenderer.bones = newHemletBones;
+                        */
+                    }
+                }
+            }
+        } 
     }
     [HarmonyPatch(typeof(Cutscene), "Play")]
         private static class BeginCutscenePatch
