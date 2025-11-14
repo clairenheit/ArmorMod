@@ -1,4 +1,6 @@
 ﻿using UnityEngine;
+using Unity;
+using UnityEngine.AddressableAssets;
 using TheForest.Utils;
 using SonsSdk;
 using Sons.Cutscenes;
@@ -9,6 +11,8 @@ using Sons.Animation.PlayerControl;
 using Sons.Ai.Vail;
 using UnityEngine.SceneManagement;
 using SUI;
+using Sons.Wearable.Clothing;
+using Sons.Wearable.Armour.Clothing;
 
 // Commented code is either elevated logging or nonfunctional code left for later
 
@@ -107,38 +111,84 @@ public class ArmorMod : SonsMod
             var OldSkin = __instance.transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("OldSkin");
             var Hemlet = __instance.transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("OldSkin").transform.Find("tacti_hemlet1");
             var HemletRenderer = Hemlet.GetComponent<SkinnedMeshRenderer>();
-            // var newHemletBones = new Transform[4]; 
-           
-            if (__instance.gameObject != LocalPlayer.GameObject)
-            {
+                
                 if (Config.enableHelmet.Value == true)
                 {
                     HemletRenderer.enabled = true;
                     HemletRenderer.castShadows = true;
-                   /* if (Hair != null)
-                    {
-                        Hair.gameObject.SetActive(false);
-                    }
-                    else 
-                    {
-                        RLog.Msg("Hair object not found!");
-                    } 
-                   */
+                    /* if (Hair != null)
+                     {
+                         Hair.gameObject.SetActive(false);
+                     }
+                     else 
+                     {
+                         RLog.Msg("Hair object not found!");
+                     } 
+                    */
                     if (Config.cutsceneHelmet.Value == true)
                     {
                         HemletRenderer.sharedMesh = RobbyRenderer.sharedMesh;
                         HemletRenderer.sharedMaterial = HelmetMaterial;
-                        /*  newHemletBones[0] = HemletRenderer.bones[0];
-                          newHemletBones[1] = HemletRenderer.bones[2];
-                          newHemletBones[2] = HemletRenderer.bones[3];
-                          newHemletBones[3] = HemletRenderer.bones[4];
-                          HemletRenderer.bones = newHemletBones;
-                        */
                     }
                 }
-            }
+            
         } 
     }
+    /* Public Static GameObject Backpack;
+    [HarmonyPatch(typeof(PlayerClothingSystem), "OnEnable")]
+        private static class BackpackPatch
+    {
+        private static void Postfix(PlayerClothingSystem __instance)
+        {           
+            GameObject ClothingSystem = __instance.transform.Find("ClothingSystem")?.gameObject;
+            if (ClothingSystem != null)
+            {
+                RLog.Msg("Found clothing system!");
+            }
+            else
+            {
+                RLog.Msg("Failed to find clothing system");
+            }
+            Array EquippedClothing = ClothingSystem.GetComponentsInChildren<SkinnedMeshRenderer>();
+
+            if (EquippedClothing != null)
+            {
+                foreach (SkinnedMeshRenderer PossibleBackpacks in EquippedClothing)
+                {
+                    if (PossibleBackpacks.sharedMesh.name == "Backpack")
+                    {
+                        Backpack = PossibleBackpacks.gameObject;
+                    }
+                    else
+                    {
+                        Backpack = null;
+                    }
+
+                    if (Backpack != null)
+                    {
+                        RLog.Msg("Found backpack!");
+                    }
+                    else if (Backpack == null)
+                    {
+                        RLog.Msg("Failed to find backpack");
+                    }
+                }
+
+                if (Config.hideBackpack.Value == true && ClothingSystem != null && __instance.gameObject != LocalPlayer.GameObject && Backpack != null)
+                {
+
+                    RLog.Msg("Hid player backpack");
+                }
+                else
+                {
+                    RLog.Msg("Failed to hide backpack!");
+                }
+                    
+            }
+    
+
+        } 
+    } */
     [HarmonyPatch(typeof(Cutscene), "Play")]
         private static class BeginCutscenePatch
         {

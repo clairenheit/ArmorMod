@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ArmorMod")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+11a2f98bb2b1fdb3d6fbb307036fc68452e70433")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3434dbb85b34e4199eaeb1ab1ef54b72a1151a77")]
 [assembly: System.Reflection.AssemblyProductAttribute("ArmorMod")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ArmorMod")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -1,10 +1,10 @@
 {
   "$schema": "https://raw.githubusercontent.com/ToniMacaroni/RedLoader/main/MetadataSchema.json",
   "id": "ArmorMod",
-  "author": "You",
-  "version": "1.0.0",
-  "description": "A mod that does something.",
+  "author": "clairenheit1367",
+  "version": "1.0.6",
+  "description": "A mod that adds tactical gear to players.",
   "gameVersion": "1.0.0",
   "type": "Mod",
-  "url": "..."
+  "url": "https://sotf-mods.com/mods/clairenheit1367/tactical-vest-mod"
 }
