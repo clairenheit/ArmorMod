@@ -9,10 +9,14 @@ using RedLoader;
 using Endnight.Utilities;
 using Sons.Animation.PlayerControl;
 using Sons.Ai.Vail;
+using Sons.Ai.Vail.StimuliTypes;
 using UnityEngine.SceneManagement;
 using SUI;
 using Sons.Wearable.Clothing;
 using Sons.Wearable.Armour.Clothing;
+using Sons.Wearable.Race;
+using Sons.Multiplayer.Client;
+using Sons.Multiplayer;
 
 // Commented code is either elevated logging or nonfunctional code left for later
 
@@ -85,7 +89,7 @@ public class ArmorMod : SonsMod
             var OldSkin = __instance.transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("OldSkin");
 
             Hips.transform.localScale = new Vector3(1, 1, 1);
-            Root.transform.localScale = new Vector3((float)0.4, (float)0.4, (float)0.4);
+            Root.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
             OldSkin.gameObject.SetActive(true);
             OldSkin.transform.Find("LeftArmMesh1")?.gameObject.SetActive(false);
             OldSkin.transform.Find("RightArmTattooMesh1")?.gameObject.SetActive(false);
@@ -106,7 +110,7 @@ public class ArmorMod : SonsMod
         private static void Postfix(PlayerLocation __instance)
         {
             var RobbyRenderer = ActorTools.GetPrefab(VailActorTypeId.Robby).gameObject.transform.Find("VisualRoot").transform.Find("RobbyRig").transform.Find("GEO").transform.Find("TacticalArmorHeadHelmetMesh").gameObject.GetComponent<SkinnedMeshRenderer>();
-            // var Hair = __instance.transform.FindDeepChild("Hair");
+            
             
             var OldSkin = __instance.transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("OldSkin");
             var Hemlet = __instance.transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("OldSkin").transform.Find("tacti_hemlet1");
@@ -116,15 +120,6 @@ public class ArmorMod : SonsMod
                 {
                     HemletRenderer.enabled = true;
                     HemletRenderer.castShadows = true;
-                    /* if (Hair != null)
-                     {
-                         Hair.gameObject.SetActive(false);
-                     }
-                     else 
-                     {
-                         RLog.Msg("Hair object not found!");
-                     } 
-                    */
                     if (Config.cutsceneHelmet.Value == true)
                     {
                         HemletRenderer.sharedMesh = RobbyRenderer.sharedMesh;
@@ -134,13 +129,18 @@ public class ArmorMod : SonsMod
             
         } 
     }
-    /* Public Static GameObject Backpack;
-    [HarmonyPatch(typeof(PlayerClothingSystem), "OnEnable")]
-        private static class BackpackPatch
-    {
-        private static void Postfix(PlayerClothingSystem __instance)
-        {           
-            GameObject ClothingSystem = __instance.transform.Find("ClothingSystem")?.gameObject;
+
+    // Translation offset: (0f 0.0736f 0.0844f)
+    // Rotation offset: (60f 0f 0f)
+    public static GameObject Backpack;
+    [HarmonyPatch(typeof(CoopPlayerRemoteSetup), "UpdatePlayerView")]
+        private static class SystemsPatches
+    {        
+        private static void Postfix(CoopPlayerRemoteSetup __instance)
+        {
+            RLog.Msg("SetAlive called and patched");
+            var ClothingSystem = __instance.transform.Find("ClothingSystem");
+
             if (ClothingSystem != null)
             {
                 RLog.Msg("Found clothing system!");
@@ -148,14 +148,16 @@ public class ArmorMod : SonsMod
             else
             {
                 RLog.Msg("Failed to find clothing system");
+                
             }
-            Array EquippedClothing = ClothingSystem.GetComponentsInChildren<SkinnedMeshRenderer>();
+                List<Transform> EquippedClothing = ClothingSystem?.gameObject.GetChildren();
 
             if (EquippedClothing != null)
             {
-                foreach (SkinnedMeshRenderer PossibleBackpacks in EquippedClothing)
+
+                foreach (Transform PossibleBackpacks in EquippedClothing)
                 {
-                    if (PossibleBackpacks.sharedMesh.name == "Backpack")
+                    if (PossibleBackpacks.gameObject.name == ("Backpack"))
                     {
                         Backpack = PossibleBackpacks.gameObject;
                     }
@@ -171,24 +173,44 @@ public class ArmorMod : SonsMod
                     else if (Backpack == null)
                     {
                         RLog.Msg("Failed to find backpack");
+                        
                     }
                 }
 
-                if (Config.hideBackpack.Value == true && ClothingSystem != null && __instance.gameObject != LocalPlayer.GameObject && Backpack != null)
+                if (Config.hideBackpack.Value == true && __instance.gameObject != LocalPlayer.GameObject && Backpack.gameObject.name == "Backpack")
                 {
-
-                    RLog.Msg("Hid player backpack");
+                    Backpack.gameObject.SetActive(false);
+                    RLog.Msg("Hid player backpack!");
                 }
                 else
                 {
                     RLog.Msg("Failed to hide backpack!");
-                }
                     
-            }
-    
+                }
 
+                var RaceSystem = __instance.transform.Find("RaceSystem");
+                GameObject Head;
+                List<Transform> Children = RaceSystem.gameObject.GetChildren();
+                foreach (Transform PossibleHead in Children)
+                {
+                    if (PossibleHead.gameObject.name.Contains("Head"))
+                    {
+                        Head = PossibleHead.gameObject;
+                        RLog.Msg("Head found!");
+                        Head.transform.Find("Hair").gameObject.SetActive(false);
+                    }
+                    else
+                    {
+                        RLog.Msg("Head not found, or helmet disabled.");
+
+                    }
+                }
+
+            }
         } 
-    } */
+    }
+
+
     [HarmonyPatch(typeof(Cutscene), "Play")]
         private static class BeginCutscenePatch
         {
