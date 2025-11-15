@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/ToniMacaroni/RedLoader/main/MetadataSchema.json",
   "id": "ArmorMod",
   "author": "clairenheit1367",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "A mod that adds tactical gear to players.",
   "gameVersion": "1.0.0",
   "type": "Mod",

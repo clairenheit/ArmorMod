@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
-using Unity;
-using UnityEngine.AddressableAssets;
+using UnityEngine.Animations;
 using TheForest.Utils;
 using SonsSdk;
 using Sons.Cutscenes;
@@ -17,6 +16,9 @@ using Sons.Wearable.Armour.Clothing;
 using Sons.Wearable.Race;
 using Sons.Multiplayer.Client;
 using Sons.Multiplayer;
+using TMPro;
+using Sons.Multiplayer.Gui;
+using UnityEngine.Playables;
 
 // Commented code is either elevated logging or nonfunctional code left for later
 
@@ -43,6 +45,10 @@ public class ArmorMod : SonsMod
     public GameObject[] PlayerNets;
     public static Material HelmetMaterial;
     public static GameObject Hair;
+    public static Transform Spine2Ref;
+    public static Vector3 TranslationOffset = new Vector3(0.0f, 0.0736f, 0.0859f);
+    public static Vector3 RotationOffset = new Vector3(60f, 0f, 0f);
+    public static Vector3 TranslationRest = new Vector3(0f,  -0.45f, 0.15f);
     protected override void OnGameStart()
     {
         UnityEngine.SceneManagement.Scene SonsStorySpots = SceneManager.GetSceneByName("SonsStorySpots");
@@ -87,6 +93,11 @@ public class ArmorMod : SonsMod
             var Hips = __instance.transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("Hips");
             var Root = __instance.transform.Find("PlayerAnimator")?.transform.Find("Root");
             var OldSkin = __instance.transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("OldSkin");
+            var PlayerNameVar = __instance.transform.Find("PlayerName");
+            var NameTagModel = PlayerNameVar.FindChild("NameTagModel");
+            var NameTagConstraint = NameTagModel.GetComponent<ParentConstraint>();
+            ConstraintSource NameTagConstraintSource = NameTagConstraint.GetSource(1);
+            NameTagConstraint.RemoveSourceInternal(0);
 
             Hips.transform.localScale = new Vector3(1, 1, 1);
             Root.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
@@ -102,6 +113,25 @@ public class ArmorMod : SonsMod
             OldSkin.transform.Find("tacti_pants1")?.gameObject.SetActive(false);
             OldSkin.transform.Find("tacti_sunglasses1")?.gameObject.SetActive(false);
             RLog.Msg("Your PlayerLocation patch method worked, thank you GLaD0S, i love you <3");
+            Spine2Ref = Hips.transform.Find("Spine").transform.Find("Spine1").transform.Find("Spine2").GetComponent<Transform>();
+            if (NameTagConstraintSource == null || NameTagConstraint.sourceCount == 0)
+            {
+                NameTagConstraint.SetSource(0, new ConstraintSource());
+                NameTagConstraintSource = NameTagConstraint.GetSource(0);
+                NameTagConstraintSource.sourceTransform = Spine2Ref;
+                NameTagConstraintSource.m_SourceTransform = Spine2Ref;
+                NameTagConstraintSource.weight = 1;
+                NameTagConstraintSource.m_Weight = 1;
+            }
+                if (NameTagConstraintSource.sourceTransform == Spine2Ref)
+                {
+                    NameTagConstraint.SetRotationOffset(0, RotationOffset);
+                    NameTagConstraint.SetTranslationOffset(0, TranslationOffset);
+                }
+                else
+                {
+                    RLog.Msg("Failed to set SourceTransform");
+                }
         }
     }
     [HarmonyPatch(typeof(PlayerLocation), "OnEnable")]
@@ -110,13 +140,13 @@ public class ArmorMod : SonsMod
         private static void Postfix(PlayerLocation __instance)
         {
             var RobbyRenderer = ActorTools.GetPrefab(VailActorTypeId.Robby).gameObject.transform.Find("VisualRoot").transform.Find("RobbyRig").transform.Find("GEO").transform.Find("TacticalArmorHeadHelmetMesh").gameObject.GetComponent<SkinnedMeshRenderer>();
-            
-            
+
+
             var OldSkin = __instance.transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("OldSkin");
             var Hemlet = __instance.transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("OldSkin").transform.Find("tacti_hemlet1");
             var HemletRenderer = Hemlet.GetComponent<SkinnedMeshRenderer>();
                 
-                if (Config.enableHelmet.Value == true)
+                if (Config.enableHelmet.Value == true && __instance != LocalPlayer.GameObject)
                 {
                     HemletRenderer.enabled = true;
                     HemletRenderer.castShadows = true;
@@ -126,12 +156,10 @@ public class ArmorMod : SonsMod
                         HemletRenderer.sharedMaterial = HelmetMaterial;
                     }
                 }
-            
         } 
     }
 
-    // Translation offset: (0f 0.0736f 0.0844f)
-    // Rotation offset: (60f 0f 0f)
+
     public static GameObject Backpack;
     [HarmonyPatch(typeof(CoopPlayerRemoteSetup), "UpdatePlayerView")]
         private static class SystemsPatches
@@ -190,14 +218,14 @@ public class ArmorMod : SonsMod
 
                 var RaceSystem = __instance.transform.Find("RaceSystem");
                 GameObject Head;
-                List<Transform> Children = RaceSystem.gameObject.GetChildren();
-                foreach (Transform PossibleHead in Children)
+                List<Transform> RaceChildren = RaceSystem.gameObject.GetChildren();
+                foreach (Transform PossibleHead in RaceChildren)
                 {
-                    if (PossibleHead.gameObject.name.Contains("Head"))
+                    if (PossibleHead.gameObject.name.Contains("Head") && Config.enableHelmet.Value == true && __instance.gameObject != LocalPlayer.GameObject)
                     {
                         Head = PossibleHead.gameObject;
                         RLog.Msg("Head found!");
-                        Head.transform.Find("Hair").gameObject.SetActive(false);
+                        Head.transform.Find("Hair")?.gameObject.SetActive(false);
                     }
                     else
                     {
@@ -205,7 +233,48 @@ public class ArmorMod : SonsMod
 
                     }
                 }
+                var PlayerNameVar = __instance.transform.Find("PlayerName");
+                var NameTagModel = PlayerNameVar.FindChild("NameTagModel");
+                var NameTagConstraint = NameTagModel.GetComponent<ParentConstraint>();
+                //var NameTagConstraintSource = NameTagConstraint.GetSource(1);
+                /* if (NameTagConstraint.sourceCount == 2)
+                {
+                    NameTagConstraint.RemoveSource(1);
+                }
+                //NameTagConstraint.translationAtRest = TranslationRest;
+                //NameTagConstraint.rotationAtRest = RotationOffset;
+                //NameTagConstraint.RemoveSource(0);
+                //NameTagConstraint.SetSource(0, new ConstraintSource());
+                /*if (NameTagConstraint.sourceCount == 0)
+                {
+                    NameTagConstraint.SetSource(0, new ConstraintSource());  
+                } */
+                /*    NameTagConstraintSource.sourceTransform = Spine2Ref;
+                    NameTagConstraintSource.weight = 1;
+                    NameTagConstraintSource.m_SourceTransform = Spine2Ref;
+                    NameTagConstraintSource.m_Weight = 1;   */
+                //NameTagConstraint.SetSource(0, NameTagConstraintSource);
+                //NameTagConstraint.GetSource(0).sourceTransform = Spine2Ref;
+                //NameTagConstraint.GetSource(0).m_SourceTransform = Spine2Ref;
 
+                //NameTagConstraint.SetRotationOffset(1, RotationOffset);
+                //NameTagConstraint.SetTranslationOffset(1, TranslationOffset);
+                var PlayerNameLink = __instance.GetComponent<CoopPlayerRemoteSetup>();
+                var RemotePlayerUsername = PlayerNameLink._cachedPlayerName;
+                var RemotePlayerUsername2 = PlayerNameVar.GetComponent<PlayerNameUiLink>()._playerName;
+                NameTagModel.gameObject.SetActive(true);
+                var PlayerNameTagLabelText = NameTagModel.transform.Find("NameTagCanvas").transform.Find("NameTagLabel").GetComponent<TextMeshProUGUI>();
+                PlayerNameTagLabelText.SetText(RemotePlayerUsername);
+                if (PlayerNameTagLabelText.text == null)
+                {
+                    RLog.Msg("Name set 1 failed");
+                    PlayerNameTagLabelText.SetText(RemotePlayerUsername2);
+                }
+                if (PlayerNameTagLabelText.text != null)
+                {
+                    PlayerNameTagLabelText.GetComponent<TextMeshProUGUI>().ForceMeshUpdate(true, true);
+                }
+                else return;
             }
         } 
     }
