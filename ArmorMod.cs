@@ -34,12 +34,12 @@ public class ArmorMod : SonsMod
 
     protected override void OnInitializeMod()
     {
-        
+
         Config.Init();
     }
 
     protected override void OnSdkInitialized()
-    { 
+    {
         SettingsRegistry.CreateSettings(this, null, typeof(Config));
     }
 
@@ -49,7 +49,8 @@ public class ArmorMod : SonsMod
     public static Transform Spine2Ref;
     public static Vector3 TranslationOffset = new Vector3(0.0f, 0.0736f, 0.0859f);
     public static Vector3 RotationOffset = new Vector3(60f, 0f, 0f);
-    public static Vector3 TranslationRest = new Vector3(0f,  -0.45f, 0.15f);
+    public static Vector3 TranslationRest = new Vector3(0f, -0.45f, 0.15f);
+    public static Transform Jaw;
     protected override void OnGameStart()
     {
         UnityEngine.SceneManagement.Scene SonsStorySpots = SceneManager.GetSceneByName("SonsStorySpots");
@@ -71,7 +72,7 @@ public class ArmorMod : SonsMod
                     RLog.Msg("Found mesh renderer");
                     HelmetMaterial = HelmetRenderer.sharedMaterial;
                 }
-               else
+                else
                 {
                     RLog.Msg("Failed to find mesh renderer");
                 }
@@ -115,20 +116,13 @@ public class ArmorMod : SonsMod
                     NameTagConstraintSource.weight = 1;
                     NameTagConstraintSource.m_Weight = 1;
                 }
-                if (NameTagConstraintSource.sourceTransform == Spine2Ref)
-                {
                     NameTagConstraint.SetRotationOffset(0, RotationOffset);
                     NameTagConstraint.SetTranslationOffset(0, TranslationOffset);
-                }
-                else
-                {
-                    RLog.Msg("Failed to set SourceTransform");
-                }
             }
 
             //Hips.transform.localScale = new Vector3(1, 1, 1);
             //Root.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
-            
+
             OldSkin.gameObject.SetActive(true);
             OldSkin.transform.Find("LeftArmMesh1")?.gameObject.SetActive(false);
             OldSkin.transform.Find("RightArmTattooMesh1")?.gameObject.SetActive(false);
@@ -145,41 +139,67 @@ public class ArmorMod : SonsMod
 
         }
     }
+    public static Transform Hemlet;
+    public static SkinnedMeshRenderer HemletRenderer;
+    public static GameObject Robby;
+    public static SkinnedMeshRenderer RobbyRenderer;
     [HarmonyPatch(typeof(PlayerLocation), "OnEnable")]
     private static class HelmetPatch
     {
         private static void Postfix(PlayerLocation __instance)
         {
-            var RobbyRenderer = ActorTools.GetPrefab(VailActorTypeId.Robby).gameObject.transform.Find("VisualRoot").transform.Find("RobbyRig").transform.Find("GEO").transform.Find("TacticalArmorHeadHelmetMesh").gameObject.GetComponent<SkinnedMeshRenderer>();
+            Robby = ActorTools.GetRobby().gameObject;
+            RobbyRenderer = Robby.transform.Find("VisualRoot").transform.Find("RobbyRig").transform.Find("GEO").transform.Find("TacticalArmorHeadHelmetMesh").gameObject.GetComponent<SkinnedMeshRenderer>();
 
 
             var OldSkin = __instance.transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("OldSkin");
-            var Hemlet = __instance.transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("OldSkin").transform.Find("tacti_hemlet1");
-            var HemletRenderer = Hemlet.GetComponent<SkinnedMeshRenderer>();
-                
-                if (Config.enableHelmet.Value == true && __instance != LocalPlayer.GameObject)
-                {
-                    HemletRenderer.enabled = true;
-                    HemletRenderer.castShadows = true;
-                    if (Config.cutsceneHelmet.Value == true)
-                    {
-                        HemletRenderer.sharedMesh = RobbyRenderer.sharedMesh;
-                        HemletRenderer.sharedMaterial = HelmetMaterial;
-                    }
-                }
-        } 
+            Hemlet = __instance.transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("OldSkin").transform.Find("tacti_hemlet1");
+            HemletRenderer = Hemlet.GetComponent<SkinnedMeshRenderer>();
+            if (Config.enableRobbyHelmet.Value == true)
+            {
+                RobbyRenderer.sharedMaterial = HelmetMaterial;
+                RobbyRenderer.gameObject.SetActive(true);
+                Robby.transform.Find("VisualRoot/RobbyRig/GEO/RobbyHair").gameObject.SetActive(false);
+            }   
+
+            if (Config.enableHelmet.Value == true && __instance.gameObject != LocalPlayer.GameObject)
+            {
+                HemletRenderer.enabled = true;
+                HemletRenderer.castShadows = true;
+            }
+            if (Config.cutsceneHelmet.Value == true)
+            {
+                HemletRenderer.sharedMesh = RobbyRenderer.sharedMesh;
+                HemletRenderer.sharedMaterial = HelmetMaterial;
+            }
+        }
     }
 
-
+    public static List<Transform> HeadBones;
+    public static List<Transform> HelmetBones;
+    public static Transform PlayerHead;
     public static GameObject Backpack;
     [HarmonyPatch(typeof(CoopPlayerRemoteSetup), "UpdatePlayerView")]
-        private static class SystemsPatches
-    {        
+    private static class SystemsPatches
+    {
         private static void Postfix(CoopPlayerRemoteSetup __instance)
         {
-            RLog.Msg("SetAlive called and patched");
+            RLog.Msg("UpdatePlayerView called and patched");
             var ClothingSystem = __instance.transform.Find("ClothingSystem");
-
+            List<Transform> RaceChildren = __instance.transform.Find("RaceSystem")?.GetChildren();
+            foreach (Transform RaceChild in RaceChildren) { 
+            if (RaceChild.name.Contains("Head"))
+                {
+                    PlayerHead = RaceChild;
+                }
+            else
+                {
+                    RLog.Msg("Unable to find player head, attempting RaceSystem get");
+                    PlayerHead = __instance.transform.Find("RaceSystem").GetComponent<PlayerRaceSystem>().GetHead().transform;
+                }
+            }
+            HeadBones = PlayerHead?.GetComponent<SkinnedMeshRenderer>().bones.ToList();
+            HelmetBones = HemletRenderer.bones.ToList();
             if (ClothingSystem != null)
             {
                 RLog.Msg("Found clothing system!");
@@ -187,9 +207,9 @@ public class ArmorMod : SonsMod
             else
             {
                 RLog.Msg("Failed to find clothing system");
-                
+
             }
-                List<Transform> EquippedClothing = ClothingSystem?.gameObject.GetChildren();
+            List<Transform> EquippedClothing = ClothingSystem?.gameObject.GetChildren();
 
             if (EquippedClothing != null)
             {
@@ -226,10 +246,18 @@ public class ArmorMod : SonsMod
                     RLog.Msg("Failed to hide backpack!");
 
                 }
+            }
 
-                var RaceSystem = __instance.transform.Find("RaceSystem");
+            if (Config.cutsceneHelmet.Value == true)
+            {
+                Jaw = __instance.transform.Find("PlayerAnimator/Root/Hips/Spine/Spine1/Spine2/Neck/Neck1/Head/Head1/Jaw1_Caucasian");
+
+                HelmetBones[1] = Jaw.transform;
+                Il2CppReferenceArray<Transform> NewHelmetBones = HelmetBones.ToArray();
+                HemletRenderer.bones = NewHelmetBones;
+            }    
                 GameObject Head;
-                List<Transform> RaceChildren = RaceSystem.gameObject.GetChildren();
+
                 foreach (Transform PossibleHead in RaceChildren)
                 {
                     if (PossibleHead.gameObject.name.Contains("Head") && Config.enableHelmet.Value == true && __instance.gameObject != LocalPlayer.GameObject)
@@ -289,287 +317,10 @@ public class ArmorMod : SonsMod
                     }
                     else return;
                 }
-            }
-        } 
-    }
-
-    
-    [HarmonyPatch(typeof(Cutscene), "Play")]
-        private static class BeginCutscenePatch
-        {
-            private static void Postfix()
-            {
-                var Hips = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("Hips");
-                var Root = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root");
-
-
-                Hips.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
-                Root.transform.localScale = new Vector3(1, 1, 1);
-              //RLog.Msg("Cutscene playing, patch applied.");
-            }
-        }
-    /*
-    [HarmonyPatch(typeof(CutsceneManager), "OnCutsceneEnded")]
-
-    private static class CompleteCutscenePatch
-    {
-        private static void Postfix()
-        {
-            var Hips = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("Hips");
-            var Root = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root");
-
-            Hips.transform.localScale = new Vector3(1, 1, 1);
-            Root.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
-            //RLog.Msg("Cutscene ended, patch applied.");
-
-
-        }
-    } 
-        [HarmonyPatch(typeof(CaveEntranceCutscene), "FinalizeSequence")]
-
-        private static class CompleteCutscenePatch2
-        {
-            private static void Postfix()
-            {
-                var Hips = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("Hips");
-                var Root = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root");
-
-                Hips.transform.localScale = new Vector3(1, 1, 1);
-                Root.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
-               //RLog.Msg("Cave entrance cutscene ending, patch applied.");
-            }
-        }
-
-        [HarmonyPatch(typeof(InventoryCutscene), "Play")]
-        private static class BeginCraftingPatch
-        {
-            private static void Postfix()
-            {
-                var Hips = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("Hips");
-                var Root = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root");
-
-
-                Hips.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
-                Root.transform.localScale = new Vector3(1, 1, 1);
-               //RLog.Msg("Inventory cutscene beginning, patch applied.");
-            }
-        }
-        [HarmonyPatch(typeof(InventoryCutscene), "Cleanup")]
-
-        private static class CompleteCraftingPatch
-        {
-            private static void Postfix()
-            {
-                var Hips = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("Hips");
-                var Root = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root");
-
-                Hips.transform.localScale = new Vector3(1, 1, 1);
-                Root.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
-               //RLog.Msg("Inventory closing, patch applied.");
-            }
-
-        }
-        [HarmonyPatch(typeof(RaftTrigger), "FinalizeCutscene")]
-
-        private static class CompleteRaftPatch
-    {
-        private static void Postfix()
-        {
-            var Hips = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("Hips");
-            var Root = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root");
-
-            Hips.transform.localScale = new Vector3(1, 1, 1);
-            Root.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
-            //RLog.Msg("Raft cutscene ending, patch applied.");
+            
         }
 
     }
-    [HarmonyPatch(typeof(PlayerAnimatorControl), "SetIsSwimming")]
-    private static class BeginSwimmingPatch
-    {
-        private static void Postfix()
-        {
-            var Hips = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("Hips");
-            var Root = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root");
-
-
-            Hips.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
-            Root.transform.localScale = new Vector3(1, 1, 1);
-            //RLog.Msg("Started swimming, patch applied.");
-        }
-    }
-    [HarmonyPatch(typeof(PlayerAnimatorControl), "SwimmingUnstashItems")]
-    private static class EndDivingPatch
-    {
-        private static void Postfix()
-        {
-            var Hips = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("Hips");
-            var Root = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root");
-
-
-            Hips.transform.localScale = new Vector3(1, 1, 1);
-            Root.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
-            //RLog.Msg("Unstashing items from swimming, patch applied.");
-        }
-    }
-    [HarmonyPatch(typeof(PlayerAnimatorControl), "enterClimbMode")]
-    private static class StartClimbingPatch
-    {
-        private static void Postfix()
-        {
-            var Hips = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("Hips");
-            var Root = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root");
-
-
-            Hips.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
-            Root.transform.localScale = new Vector3(1, 1, 1);
-            //RLog.Msg("Started climbing, patch applied.");
-        }
-    }
-    [HarmonyPatch(typeof(PlayerAnimatorControl), "exitClimbMode")]
-    private static class EndClimbingPatch
-    { 
-        private static void Postfix()
-        {
-            var Hips = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("Hips");
-            var Root = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root");
-
-
-            Hips.transform.localScale = new Vector3(1, 1, 1);
-            Root.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
-            //RLog.Msg("Stopped climbing, patch applied.");
-        }
-    }
-    [HarmonyPatch(typeof(PlayerAnimatorControl), "OnStartSlide")]
-    private static class BeginSlidingPatch
-    {
-        private static void Postfix()
-        {
-            var Hips = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("Hips");
-            var Root = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root");
-
-
-            Hips.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
-            Root.transform.localScale = new Vector3(1, 1, 1);
-            //RLog.Msg("Started sliding, patch applied.");
-        }
-    }
-    [HarmonyPatch(typeof(PlayerAnimatorControl), "OnStopSlide")]
-    private static class EndSlidingPatch
-    {
-        private static void Postfix()
-        {
-            var Hips = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("Hips");
-            var Root = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root");
-
-
-            Hips.transform.localScale = new Vector3(1, 1, 1);
-            Root.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
-            //RLog.Msg("Stopped sliding, patch applied.");
-        }
-    }
-    [HarmonyPatch(typeof(PlayerAnimatorControl), "UnlockFromCutscene")]
-    private static class UnlockFromCutscenePatch
-    {
-        private static void Postfix()
-        {
-            var Hips = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("Hips");
-            var Root = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root");
-
-
-            Hips.transform.localScale = new Vector3(1, 1, 1);
-            Root.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
-            //RLog.Msg("Unlocked from cutscene, patch applied.");
-        }
-    }
-    [HarmonyPatch(typeof(PlayerAnimatorControl), "LockForCutscene")]
-    private static class LockForCutscenePatch
-    {
-        private static void Postfix()
-        {
-            var Hips = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("Hips");
-            var Root = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root");
-
-
-            Hips.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
-            Root.transform.localScale = new Vector3(1, 1, 1);
-            //RLog.Msg("Locked for cutscene, patch applied.");
-        }
-    }
-    [HarmonyPatch(typeof(PlayerAnimatorControl), "LockForHiddenCutscene")]
-    private static class LockForHiddenCutscenePatch
-    {
-        private static void Postfix()
-        {
-            var Hips = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("Hips");
-            var Root = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root");
-
-
-            Hips.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
-            Root.transform.localScale = new Vector3(1, 1, 1);
-            //RLog.Msg("Locked for hidden cutscene, patch applied.");
-        }
-    }
-    [HarmonyPatch(typeof(PlayerAnimatorControl), "SpawnStandUpProps")]
-    private static class StandUpFromCrashRoutinePatch
-    {
-        private static void Postfix()
-        {
-            var Hips = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("Hips");
-            var Root = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root");
-
-
-            Hips.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
-            Root.transform.localScale = new Vector3(1, 1, 1);
-            //RLog.Msg("Spawned stand up props, patch applied.");
-        }
-    } 
-    
-  // Placing animation fix causes obviously visible vest inflation 
-    
-    [HarmonyPatch(typeof(PlayerAnimationData), "EnterAnimation")]
-    private static class EnterPlaceAnimationPatch
-    {
-        private static void Postfix()
-        {
-            var Hips = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("Hips");
-            var Root = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root");
-
-
-            Hips.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
-            Root.transform.localScale = new Vector3(1, 1, 1);
-            //RLog.Msg("Started placing animation, patch applied.");
-        }
-    }
-    [HarmonyPatch(typeof(PlayerAnimationData), "ExitAnimation")]
-    private static class ExitPlaceAnimationPatch
-    {
-        private static void Postfix()
-        {
-            var Hips = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("Hips");
-            var Root = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root");
-
-
-            Hips.transform.localScale = new Vector3(1, 1, 1);
-            Root.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
-            //RLog.Msg("Exiting place animation, patch applied.");
-        }
-    }
-   
-    [HarmonyPatch(typeof(PlayerAnimatorControl), "DestroyStandUpProps")]
-    private static class DestroyStandUpPropsPatch
-    {
-        private static void Postfix()
-        {
-            var Hips = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("Hips");
-            var Root = LocalPlayer.Transform.Find("PlayerAnimator")?.transform.Find("Root");
-
-
-            Hips.transform.localScale = new Vector3(1, 1, 1);
-            Root.transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
-            //RLog.Msg("Destroying stand up props, patch applied.");
-        }
-    } */
 }
     
   

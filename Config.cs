@@ -11,6 +11,7 @@ public static class Config
     public static ConfigEntry<bool> enableHelmet { get; private set; }
     public static ConfigEntry<bool> cutsceneHelmet { get; private set; }
     public static ConfigEntry<bool> hideBackpack { get; private set; }
+    public static ConfigEntry<bool> enableRobbyHelmet { get; private set; }
     // Auto populated after calling SettingsRegistry.CreateSettings...
     private static SettingsRegistry.SettingsEntry _settingsEntry;
 
@@ -35,7 +36,13 @@ public static class Config
             false,
             "Hide player backpacks",
             "Hides the backpacks of other players, good for if you want the Trailer 1 look when combined with the helmet"
-            ); 
+            );
+        enableRobbyHelmet = Category.CreateEntry(
+            "enableRobbyHelmet",
+            false,
+            "Enables Kelvin's intro helmet",
+            "Requires reload"
+            );
       
         // SomeEntry = Category.CreateEntry(
         //     "some_entry",
