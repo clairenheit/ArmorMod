@@ -51,6 +51,14 @@ public class ArmorMod : SonsMod
     public static Vector3 RotationOffset = new Vector3(60f, 0f, 0f);
     public static Vector3 TranslationRest = new Vector3(0f, -0.45f, 0.15f);
     public static Transform Jaw;
+    public static Transform Hemlet;
+    public static SkinnedMeshRenderer HemletRenderer;
+    public static VailActor Robby;
+    public static SkinnedMeshRenderer RobbyRenderer;
+    public static List<Transform> HeadBones;
+    public static List<Transform> HelmetBones;
+    public static Transform PlayerHead;
+    public static GameObject Backpack;
     protected override void OnGameStart()
     {
         UnityEngine.SceneManagement.Scene SonsStorySpots = SceneManager.GetSceneByName("SonsStorySpots");
@@ -84,6 +92,15 @@ public class ArmorMod : SonsMod
                 {
                     RLog.Msg("Failed to find Helmet Material");
                 }
+            }
+            Robby = ActorTools.GetRobby();
+            RobbyRenderer = Robby.transform.Find("VisualRoot").transform.Find("RobbyRig").transform.Find("GEO").transform.Find("TacticalArmorHeadHelmetMesh").gameObject.GetComponent<SkinnedMeshRenderer>();
+            if (Config.enableRobbyHelmet.Value == true)
+            {
+                RobbyRenderer.sharedMaterial = HelmetMaterial;
+                RobbyRenderer.gameObject.SetActive(true);
+                Robby.transform.Find("VisualRoot/RobbyRig/GEO/RobbyHair").gameObject.SetActive(false);
+                RLog.Msg("Robby helmet enabled");
             }
         }
     }
@@ -139,27 +156,22 @@ public class ArmorMod : SonsMod
 
         }
     }
-    public static Transform Hemlet;
-    public static SkinnedMeshRenderer HemletRenderer;
-    public static GameObject Robby;
-    public static SkinnedMeshRenderer RobbyRenderer;
+
     [HarmonyPatch(typeof(PlayerLocation), "OnEnable")]
     private static class HelmetPatch
     {
         private static void Postfix(PlayerLocation __instance)
         {
-            Robby = ActorTools.GetRobby().gameObject;
-            RobbyRenderer = Robby.transform.Find("VisualRoot").transform.Find("RobbyRig").transform.Find("GEO").transform.Find("TacticalArmorHeadHelmetMesh").gameObject.GetComponent<SkinnedMeshRenderer>();
-
-
             var OldSkin = __instance.transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("OldSkin");
             Hemlet = __instance.transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("OldSkin").transform.Find("tacti_hemlet1");
             HemletRenderer = Hemlet.GetComponent<SkinnedMeshRenderer>();
-            if (Config.enableRobbyHelmet.Value == true)
+            if (Robby.gameObject != null)
             {
-                RobbyRenderer.sharedMaterial = HelmetMaterial;
-                RobbyRenderer.gameObject.SetActive(true);
-                Robby.transform.Find("VisualRoot/RobbyRig/GEO/RobbyHair").gameObject.SetActive(false);
+                RLog.Msg("Found Robby");
+            }
+            else
+            {
+                RLog.Msg("Robby is " + Robby.ToString());
             }   
 
             if (Config.enableHelmet.Value == true && __instance.gameObject != LocalPlayer.GameObject)
@@ -175,10 +187,6 @@ public class ArmorMod : SonsMod
         }
     }
 
-    public static List<Transform> HeadBones;
-    public static List<Transform> HelmetBones;
-    public static Transform PlayerHead;
-    public static GameObject Backpack;
     [HarmonyPatch(typeof(CoopPlayerRemoteSetup), "UpdatePlayerView")]
     private static class SystemsPatches
     {
