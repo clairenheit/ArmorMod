@@ -25,6 +25,10 @@ using Il2CppSystem;
 using UnityEngine.AddressableAssets;
 using Sons.Utils;
 using Il2CppInterop.Runtime;
+using Sons;
+using UnityEngine.Playables;
+using Sons.Wearable.Armour;
+using Il2CppSystem.Runtime.Remoting.Messaging;
 
 
 // Commented code is either elevated logging or nonfunctional code left for later
@@ -67,17 +71,19 @@ public class ArmorMod : SonsMod
     public static Transform TacticalSoldierRef;
     public static SkinnedMeshRenderer TacticoolBalaclavaRef;
     public static SkinnedMeshRenderer HelmetRendererRef;
+    public static SkinnedMeshRenderer GloveRef;
+    public static SkinnedMeshRenderer RobbyHelmetRendererRef;
     public static bool RobbyInitialized = false;
 
 
-    public static void ApplyGloves(Transform Object)
+    public static Transform ApplyGloves(Transform Object)
     {
         var OldSkin = Object.transform.FindDeepChild("OldSkin");
         var RaceSystem = Object.Find("RaceSystem").GetComponent<PlayerRaceSystem>();
         var LeftHand = RaceSystem.GetLeftArm().GetComponent<SkinnedMeshRenderer>();
         var RightHand = RaceSystem.GetRightArm().GetComponent<SkinnedMeshRenderer>();
         var Spine2Ref = Object.FindDeepChild("Spine2");
-        var GloveRef = TacticalSoldierRef.FindDeepChild("gloves").GetComponent<SkinnedMeshRenderer>();
+        
         var LeftHandBones = LeftHand.bones.ToList();
         var RightHandBones = RightHand.bones.ToList();
         var GloveBones = new List<Transform>(88);
@@ -176,89 +182,112 @@ public class ArmorMod : SonsMod
         PlayerGlovesRenderer.bones = GloveBonesFinal;
         PlayerGlovesRenderer.gameObject.SetActive(true);
         PlayerGlovesRenderer.gameObject.layer = LayerMask.NameToLayer("Player");
+        return (PlayerGlovesRenderer.transform);
     }
-    public static void ApplyMask(Transform Object)
+    public static Transform ApplyMask(Transform Object)
     {
         var Root = Object.FindDeepChild("Root");
         var OldSkin = Object.transform.FindDeepChild("OldSkin");
         var Spine2Ref = Object.FindDeepChild("Spine2");
-        var MaskRef = TreeCrashTacticoolRef.Find("GEO/HeadVariants/CaucasianMask/CaucasianHead/WhiteHeadBalaclavaBloody_addressableInstance/TacticoolBalaclava");
+        var MaskRef = TreeCrashTacticoolRef.FindDeepChild("TacticoolBalaclava").gameObject;
         var PlayerMask = GameObject.Instantiate(MaskRef, OldSkin);
         SkinnedMeshBoneRemapCache.RetargetBones(PlayerMask.GetComponent<SkinnedMeshBoneRemapCache>(), Root);
         PlayerMask.GetComponent<SkinnedMeshRenderer>().sharedMaterial = TacticoolBalaclavaRef.sharedMaterial;
-
+        return (PlayerMask.transform);
     }
 
 
     protected override void OnGameStart()
     {
-        
-            
-                AssetManager = new GameObject().transform;
-                AssetManager.gameObject.name = "ArmorMod Asset Manager";
-                AssetManager.gameObject.SetActive(true);
-                var LocalPlayerRef = LocalPlayer.GameObject;
-
-                OpeningCutsceneRef = CutsceneManager._instance._openingCutscene.GetComponent<OpeningCutscene>();
-
-                if (OpeningCutsceneRef)
-                {
-                    PlayerTactiRef = GameObject.Instantiate(OpeningCutsceneRef.GetComponent<OpeningCutscene>()._playerAnimator.transform.Find("GEO"), AssetManager);
-                    PlayerTactiRef.gameObject.SetActive(false);
-                    TacticalSoldierRef = GameObject.Instantiate(OpeningCutsceneRef.GetComponent<OpeningCutscene>()._tacti1Animator.transform.Find("GEO"), AssetManager);
-                    TacticalSoldierRef.gameObject.SetActive(true);
-                    TacticoolBalaclavaRef = TacticalSoldierRef.FindDeepChild("mask").GetComponent<SkinnedMeshRenderer>();
-                    TreeCrashTacticoolRef = GameObject.Instantiate(OpeningCutsceneRef._helicopterCrashCutscenes[0].GetComponent<HelicopterTreeCrashCutscene>()._crashedHelicopterGo.transform.FindDeepChild("TreeCrashTacticool"), AssetManager);
-                    TreeCrashTacticoolRef.gameObject.SetActive(true);
-                    TreeCrashTacticoolRef.Find("GEO").gameObject.SetActive(true);
-                    HelmetRendererRef = TacticalSoldierRef.Find("TacticalArmorHeadHelmetMesh").GetComponent<SkinnedMeshRenderer>();
-
-                    RLog.Msg("Opening cutscene assets initialized");
-                }
-
-                var Hips = LocalPlayerRef.transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("Hips");
-                var Root = LocalPlayerRef.transform.Find("PlayerAnimator")?.transform.Find("Root");
-                var OldSkin = LocalPlayerRef.transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("OldSkin");
-                var ClothingSystem = LocalPlayerRef.transform.Find("ClothingSystem").GetComponent<PlayerClothingSystem>();
-                var RaceSystem = LocalPlayerRef.transform.Find("RaceSystem").GetComponent<PlayerRaceSystem>();
-                var LeftHand = RaceSystem.GetLeftArm();
-                var RightHand = RaceSystem.GetRightArm();
-                var PlayerHead = RaceSystem.GetHead().transform;
-                var OldJacket = OldSkin.Find("tacti_jacket1").GetComponent<SkinnedMeshRenderer>();
-                var NewJacket = ClothingSystem.transform.Find("TacticalJacket").GetComponent<SkinnedMeshRenderer>();
-                var Spine2Ref = Hips.FindDeepChild("Spine2");
-                var TactiBodyArmor = OldSkin.transform.Find("tacti_body_armor1").GetComponent<SkinnedMeshRenderer>();
 
 
-                var OldJacketBones = OldJacket.bones.ToList();
-                OldJacketBones[0] = Hips;
-                var OldJacketBonesNew = OldJacketBones.ToArray();
-                OldJacket.bones = OldJacketBonesNew;
+        AssetManager = new GameObject().transform;
+        AssetManager.gameObject.name = "ArmorMod Asset Manager";
+        AssetManager.gameObject.SetActive(true);
+        var LocalPlayerRef = LocalPlayer.GameObject;
 
-                var TactiBodyArmorBones = TactiBodyArmor.bones.ToList();
-                TactiBodyArmorBones[0] = Hips;
-                var TactiBodyArmorBonesNew = TactiBodyArmorBones.ToArray();
-                TactiBodyArmor.bones = TactiBodyArmorBonesNew;
+        OpeningCutsceneRef = CutsceneManager._instance._openingCutscene.GetComponent<OpeningCutscene>();
 
-                OldSkin.gameObject.SetActive(true);
+        if (OpeningCutsceneRef)
+        {
+            PlayerTactiRef = GameObject.Instantiate(OpeningCutsceneRef.GetComponent<OpeningCutscene>()._playerAnimator.transform.Find("GEO"), AssetManager);
+            PlayerTactiRef.gameObject.SetActive(false);
+            TacticalSoldierRef = GameObject.Instantiate(OpeningCutsceneRef.GetComponent<OpeningCutscene>()._tacti1Animator.transform.Find("GEO"), AssetManager);
+            TacticalSoldierRef.gameObject.SetActive(true);
+            TacticoolBalaclavaRef = TacticalSoldierRef.FindDeepChild("mask").GetComponent<SkinnedMeshRenderer>();
+            TreeCrashTacticoolRef = GameObject.Instantiate(OpeningCutsceneRef._helicopterCrashCutscenes[0].GetComponent<HelicopterTreeCrashCutscene>()._crashedHelicopterGo.transform.FindDeepChild("TreeCrashTacticool"), AssetManager);
+            TreeCrashTacticoolRef.gameObject.SetActive(true);
+            TreeCrashTacticoolRef.Find("GEO").gameObject.SetActive(true);
+            HelmetRendererRef = TacticalSoldierRef.Find("TacticalArmorHeadHelmetMesh").GetComponent<SkinnedMeshRenderer>();
+            GloveRef = TacticalSoldierRef.FindDeepChild("gloves").GetComponent<SkinnedMeshRenderer>();
+            HelmetMaterial = HelmetRendererRef.sharedMaterial;
 
-                var OldSkinChildren = OldSkin.GetChildren();
-                foreach (var child in OldSkinChildren)
-                {
-                    child.GetComponent<SkinnedMeshRenderer>().enabled = true;
-                    child.GetComponent<SkinnedMeshRenderer>().castShadows = true;
-                    child.gameObject.SetActive(false);
-                }
-                if (Config.enableBodyArmor.Value == true)
-                {
-                    TactiBodyArmor.gameObject.SetActive(true);
-                }
-                if (Config.useOldJacket.Value == true)
-                {
-                    NewJacket.sharedMesh = OldJacket.sharedMesh;
-                    NewJacket.sharedMaterial = OldJacket.sharedMaterial;
-                    NewJacket.bones = OldJacketBonesNew;
-                }
+            RLog.Msg("Opening cutscene assets initialized");
+        }
+
+        var Hips = LocalPlayerRef.transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("Hips");
+        var Root = LocalPlayerRef.transform.Find("PlayerAnimator")?.transform.Find("Root");
+        var OldSkin = LocalPlayerRef.transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("OldSkin");
+        var ClothingSystem = LocalPlayerRef.transform.Find("ClothingSystem").GetComponent<PlayerClothingSystem>();
+        var RaceSystem = LocalPlayerRef.transform.Find("RaceSystem").GetComponent<PlayerRaceSystem>();
+        var LeftHand = RaceSystem.GetLeftArm();
+        var RightHand = RaceSystem.GetRightArm();
+        var PlayerHead = RaceSystem.GetHead().transform;
+        var OldJacket = OldSkin.Find("tacti_jacket1").GetComponent<SkinnedMeshRenderer>();
+        var NewJacket = ClothingSystem.transform.Find("TacticalJacket").GetComponent<SkinnedMeshRenderer>();
+        var Spine2Ref = Hips.FindDeepChild("Spine2");
+        var TactiBodyArmor = OldSkin.transform.Find("tacti_body_armor1").GetComponent<SkinnedMeshRenderer>();
+        var Hemlet = OldSkin.transform.Find("tacti_hemlet1");
+        var HemletRenderer = Hemlet.GetComponent<SkinnedMeshRenderer>();
+        var HelmetBones = HemletRenderer.bones.ToList();
+        var Jaw = LocalPlayer.GameObject.transform.FindDeepChild("Jaw1_Caucasian");
+
+
+        var OldJacketBones = OldJacket.bones.ToList();
+        OldJacketBones[0] = Hips;
+        var OldJacketBonesNew = OldJacketBones.ToArray();
+        OldJacket.bones = OldJacketBonesNew;
+
+        var TactiBodyArmorBones = TactiBodyArmor.bones.ToList();
+        TactiBodyArmorBones[0] = Hips;
+        var TactiBodyArmorBonesNew = TactiBodyArmorBones.ToArray();
+        TactiBodyArmor.bones = TactiBodyArmorBonesNew;
+
+        if (ActorTools.GetRobby())
+        {
+            Robby = ActorTools.GetRobby();
+            RobbyHelmetRenderer = Robby.transform.Find("VisualRoot").transform.Find("RobbyRig").transform.Find("GEO").transform.Find("TacticalArmorHeadHelmetMesh").gameObject.GetComponent<SkinnedMeshRenderer>();
+            RobbyHelmetRendererRef = GameObject.Instantiate(RobbyHelmetRenderer.gameObject, AssetManager).GetComponent<SkinnedMeshRenderer>();
+            RobbyHelmetRenderer.sharedMaterial = HelmetMaterial;
+            RobbyGloves = Robby.transform.Find("VisualRoot/RobbyRig/GEO/gloves").gameObject;
+            if (Config.enableRobbyHelmet.Value == true && RobbyHelmetRenderer.gameObject.active == false)
+            {
+                RobbyHelmetRenderer.gameObject.SetActive(true);
+                Robby.transform.Find("VisualRoot/RobbyRig/GEO/RobbyHair").gameObject.SetActive(false);
+                RLog.Msg("Robby helmet enabled");
+            }
+            RobbyInitialized = true;
+        }
+
+        OldSkin.gameObject.SetActive(true);
+
+        var OldSkinChildren = OldSkin.GetChildren();
+        foreach (var child in OldSkinChildren)
+        {
+            child.GetComponent<SkinnedMeshRenderer>().enabled = true;
+            child.GetComponent<SkinnedMeshRenderer>().castShadows = true;
+            child.gameObject.SetActive(false);
+        }
+        if (Config.enableBodyArmor.Value == true)
+        {
+            TactiBodyArmor.gameObject.SetActive(true);
+        }
+        if (Config.useOldJacket.Value == true)
+        {
+            NewJacket.sharedMesh = OldJacket.sharedMesh;
+            NewJacket.sharedMaterial = OldJacket.sharedMaterial;
+            NewJacket.bones = OldJacketBonesNew;
+        }
         if (Config.hideBackpack.Value == true)
         {
             if (ClothingSystem._defaultClothing._size == 4)
@@ -270,27 +299,39 @@ public class ArmorMod : SonsMod
                 ClothingSystem._allClothing.RemoveAt(11);
             }
             ClothingSystem.transform.Find("Backpack")?.gameObject.SetActive(false);
+        }
+        if (Config.useGloves.Value == true)
+        {
+            ApplyGloves(LocalPlayer.Transform);
+            RaceSystem.HideArms(true);
+        }
+        if (Config.enableHelmet.Value == true)
+        {
+            Hemlet.gameObject.SetActive(true);
+            Hemlet.GetComponent<SkinnedMeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly;
+        }
+        if (Config.cutsceneHelmet.Value == true == RobbyInitialized == true)
+        {
+            HemletRenderer.sharedMesh = RobbyHelmetRendererRef.sharedMesh;
+            HemletRenderer.sharedMaterial = HelmetMaterial;
+            HelmetBones[1] = Jaw.transform;
+            Il2CppReferenceArray<Transform> NewHelmetBones = HelmetBones.ToArray();
+            HemletRenderer.bones = NewHelmetBones;
+        }
 
-            if (Config.useGloves.Value == true)
+        if (Config.hideArmorSystem.Value == true)
+        {
+            var ArmorSystem = LocalPlayer.GameObject.transform.FindDeepChild("ArmourSystem");
+            foreach (Transform ArmorPiece in ArmorSystem.GetChildren())
             {
-                ApplyGloves(LocalPlayer.Transform);
-                RaceSystem.HideArms(true);
+                ArmorPiece.gameObject.SetActive(false);
             }
-            if (ActorTools.GetRobby())
-            {
-                Robby = ActorTools.GetRobby();
-                RobbyHelmetRenderer = Robby.transform.Find("VisualRoot").transform.Find("RobbyRig").transform.Find("GEO").transform.Find("TacticalArmorHeadHelmetMesh").gameObject.GetComponent<SkinnedMeshRenderer>();
-                HelmetMaterial = HelmetRendererRef.sharedMaterial;
-                RobbyHelmetRenderer.sharedMaterial = HelmetMaterial;
-                RobbyGloves = Robby.transform.Find("VisualRoot/RobbyRig/GEO/gloves").gameObject;
-                if (Config.enableRobbyHelmet.Value == true && RobbyHelmetRenderer.gameObject.active == false)
-                {
-                    RobbyHelmetRenderer.gameObject.SetActive(true);
-                    Robby.transform.Find("VisualRoot/RobbyRig/GEO/RobbyHair").gameObject.SetActive(false);
-                    RLog.Msg("Robby helmet enabled");
-                }
-                RobbyInitialized = true;
-            }
+        }
+
+        if (Config.useGlasses.Value == true)
+        {
+            OldSkin.Find("tacti_sunglasses1").gameObject.SetActive(true);
+            OldSkin.Find("tacti_sunglasses1").GetComponent<SkinnedMeshRenderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.ShadowsOnly;
         }
     }
 
@@ -304,7 +345,19 @@ public class ArmorMod : SonsMod
                 __instance._playerAnimator.transform.root.Find("RaceSystem").GetComponent<PlayerRaceSystem>().HideArms(true);
             }
         }
+    }    
+    [HarmonyPatch(typeof(InventoryCutscene), "PostStartHook")]
+    private static class InventoryCutsceneCheck2
+    {
+        private static void Postfix(InventoryCutscene __instance)
+        {
+            if (Config.useGloves.Value == true)
+            {
+                __instance._playerAnimator.transform.root.Find("RaceSystem").GetComponent<PlayerRaceSystem>().HideArms(true);
+            }
+        }
     }
+
 
 
 
@@ -317,7 +370,7 @@ public class ArmorMod : SonsMod
             {
                 Robby = ActorTools.GetRobby();
                 RobbyHelmetRenderer = Robby.transform.Find("VisualRoot").transform.Find("RobbyRig").transform.Find("GEO").transform.Find("TacticalArmorHeadHelmetMesh").gameObject.GetComponent<SkinnedMeshRenderer>();
-                HelmetMaterial = HelmetRendererRef.sharedMaterial;
+                RobbyHelmetRendererRef = GameObject.Instantiate(RobbyHelmetRenderer.gameObject, AssetManager).GetComponent<SkinnedMeshRenderer>();
                 RobbyHelmetRenderer.sharedMaterial = HelmetMaterial;
                 RobbyGloves = Robby.transform.Find("VisualRoot/RobbyRig/GEO/gloves").gameObject;
                 if (Config.enableRobbyHelmet.Value == true && RobbyHelmetRenderer.gameObject.active == false)
@@ -331,6 +384,20 @@ public class ArmorMod : SonsMod
             if (Config.useGloves.Value == true && LocalPlayer.RaceSystem)
             {
                 LocalPlayer.RaceSystem?.HideArms(true);
+            }
+            if (Config.cutsceneHelmet.Value == true)
+            {
+                var LocalPlayerRef = LocalPlayer.GameObject;
+                var OldSkin = LocalPlayerRef.transform.Find("PlayerAnimator")?.transform.Find("Root")?.transform.Find("OldSkin");
+                var Jaw = LocalPlayer.GameObject.transform.FindDeepChild("Jaw1_Caucasian");
+                var Hemlet = OldSkin.transform.Find("tacti_hemlet1");
+                var HemletRenderer = Hemlet.GetComponent<SkinnedMeshRenderer>();
+                var HelmetBones = HemletRenderer.bones.ToList();
+                HemletRenderer.sharedMesh = RobbyHelmetRendererRef.sharedMesh;
+                HemletRenderer.sharedMaterial = HelmetMaterial;
+                HelmetBones[1] = Jaw.transform;
+                Il2CppReferenceArray<Transform> NewHelmetBones = HelmetBones.ToArray();
+                HemletRenderer.bones = NewHelmetBones;
             }
         }
     }
@@ -348,6 +415,7 @@ private static class JacketChangePatch
                 Thread.Sleep(100);
                 if (__instance.transform.Find("TacticalJacket"))
                 {
+                    var RaceSystem = __instance.transform.GetParent().Find("RaceSystem").GetComponent<PlayerRaceSystem>();
                     if (Config.useOldJacket.Value == true)
                     {
                         var OldJacket = __instance._animationRoot.transform.FindDeepChild("tacti_jacket1").GetComponent<SkinnedMeshRenderer>();
@@ -357,18 +425,33 @@ private static class JacketChangePatch
                         NewJacket.bones = OldJacket.bones;
                         RLog.Msg("Jacket change reapplied");
                     }
-                    if (Config.useGloves.Value == true)
+                    if (Config.useGloves.Value == true && __instance.transform.GetParent().gameObject == LocalPlayer.GameObject)
                     {
-                        __instance.transform.Find("RaceSystem").GetComponent<PlayerRaceSystem>().HideArms(true);
+                        RaceSystem.HideArms(true);
                     }
                 }
             }
     }
 }
+    [HarmonyPatch(typeof(InventoryArmourItem), "TryPerformAction")]
+    private static class HideArmorPatch
+    {
+        private static void Postfix(InventoryArmourItem __instance)
+        {
+            RLog.Msg("Armor equip detected");
+            if (Config.hideArmorSystem.Value == true)
+            {
+                var ArmorSystem = __instance._armourSystem.transform;
+                foreach (Transform ArmorPiece in ArmorSystem.GetChildren())
+                {
+                    ArmorPiece.gameObject.SetActive(false);
+                }
+            }
+        }
+    }
 
 
-
-[HarmonyPatch(typeof(PlayerLocation), "OnEnable")]
+    [HarmonyPatch(typeof(PlayerLocation), "OnEnable")]
     private static class PlayerLocationSetupPatch
     {
         private static void Postfix(PlayerLocation __instance)
@@ -393,9 +476,6 @@ private static class JacketChangePatch
                     var TactiBodyArmorBonesNew = TactiBodyArmorBones.ToArray();
                     TactiBodyArmor.bones = TactiBodyArmorBonesNew;
 
-
-                
-            
         }
     }
 
@@ -433,15 +513,6 @@ private static class JacketChangePatch
             TactiBodyArmorBones[0] = Hips;
             var TactiBodyArmorBonesNew = TactiBodyArmorBones.ToArray();
             TactiBodyArmor.bones = TactiBodyArmorBonesNew;
-            if (Config.useMasks.Value == true)
-            {
-                if (RaceSystem._race != PlayerRace.Race.White && RaceSystem._race != PlayerRace.Race.Latin)
-                {
-                    RaceSystem.ApplyRace(PlayerRace.Race.Latin);
-                    RaceSystem.HideArms(true);                    
-                }
-
-            }
 
             OldSkin.gameObject.SetActive(true);
 
@@ -486,30 +557,19 @@ private static class JacketChangePatch
                 NameTagModel.gameObject.SetActive(true);
                 var PlayerNameTagLabelText = NameTagModel.transform.Find("NameTagCanvas").transform.Find("NameTagLabel").GetComponent<TextMeshProUGUI>();
                 PlayerNameTagLabelText.SetText(RemotePlayerUsername);
+                /*
                 if (PlayerNameTagLabelText.text == null)
                 {
                     RLog.Msg("Name set 1 failed");
-                    PlayerNameTagLabelText.SetText(RemotePlayerUsername2);
+                    PlayerNameTagLabelText?.SetText(RemotePlayerUsername2);
                 }
+                */
                 PlayerNameTagLabelText.GetComponent<TextMeshProUGUI>().ForceMeshUpdate(true, true);
             }
 
-            if (ClothingSystem)
-            {
-                RLog.Msg("Found clothing system!");
-            }
-            else
-            {
-                RLog.Msg("Failed to find clothing system");
-
-            }
             if (Config.enableBodyArmor.Value == true)
             {
                 TactiBodyArmor.gameObject.SetActive(true);
-            }
-            if (Config.enableHelmet.Value == true)
-            {
-                Hemlet.gameObject.SetActive(true);
             }
             List<Transform> EquippedClothing = ClothingSystem?.gameObject.GetChildren();
 
@@ -530,16 +590,30 @@ private static class JacketChangePatch
             if (Config.enableHelmet.Value == true)
                 {
                     Hemlet.gameObject.SetActive(true);
-                    //RaceSystem.GetHead().transform.Find("Hair").gameObject.SetActive(false);
+                __instance.transform.Find("RaceSystem").FindDeepChild("Hair").gameObject.SetActive(false);
+                HemletRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
             }
                 if (Config.cutsceneHelmet.Value == true)
                 {
-                    HemletRenderer.sharedMesh = RobbyHelmetRenderer.sharedMesh;
-                    HemletRenderer.sharedMaterial = HelmetMaterial;
-                    HelmetBones[1] = Jaw.transform;
-                    Il2CppReferenceArray<Transform> NewHelmetBones = HelmetBones.ToArray();
-                    HemletRenderer.bones = NewHelmetBones;
+                HemletRenderer.sharedMesh = RobbyHelmetRendererRef.sharedMesh;
+                HemletRenderer.sharedMaterial = HelmetMaterial;
+                HelmetBones[1] = Jaw.transform;
+                Il2CppReferenceArray<Transform> NewHelmetBones = HelmetBones.ToArray();
+                HemletRenderer.bones = NewHelmetBones;
+            }
+            if (Config.useMasks.Value == true)
+            {
+                ApplyMask(__instance.transform);
+                __instance.transform.Find("RaceSystem").FindDeepChild("Hair").gameObject.SetActive(false);
+                if (RaceSystem._race != PlayerRace.Race.White && RaceSystem._race != PlayerRace.Race.Latin)
+                {
+                    RaceSystem.ApplyRace(PlayerRace.Race.Latin);
+                    if (Config.useGloves.Value == true || Config.useOldJacket.Value == true)
+                    {
+                        RaceSystem.HideArms(true);
+                    }
                 }
+            }
             if (Config.useOldJacket.Value == true)
             {                
                 NewJacket.sharedMesh = OldJacket.sharedMesh;
@@ -554,20 +628,18 @@ private static class JacketChangePatch
                 RaceSystem.HideArms(true);
                 ApplyGloves(__instance.transform);
             }
-            if (Config.useMasks.Value == true)
-            {
-                ApplyMask(__instance.transform);
-                //RaceSystem.GetHead().transform.Find("Hair").gameObject.SetActive(false);               
-            }
-
             if (Config.useGlasses.Value == true)
             {
                 OldSkin.Find("tacti_sunglasses1").gameObject.SetActive(true);
             }
-
-
-            
-
+            if (Config.hideArmorSystem.Value == true)
+            {
+                var ArmorSystem = __instance._armourSystem.transform;
+                foreach (Transform ArmorPiece in ArmorSystem.GetChildren())
+                {
+                    ArmorPiece.gameObject.SetActive(false);
+                }
+            }
         }
     }
 }

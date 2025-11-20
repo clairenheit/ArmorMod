@@ -18,6 +18,7 @@ public static class Config
     public static ConfigEntry<bool> useOldJacket { get; private set; }
     public static ConfigEntry<bool> useMasks { get; private set; }
     public static ConfigEntry<bool> useGlasses { get; private set; }
+    public static ConfigEntry<bool> hideArmorSystem { get; private set; }
     // Auto populated after calling SettingsRegistry.CreateSettings...
     private static SettingsRegistry.SettingsEntry _settingsEntry;
 
@@ -84,6 +85,12 @@ public static class Config
             false,
             "Add glasses?",
             "Adds sunglasses to other players. Requires reload."
+            );
+        hideArmorSystem = Category.CreateEntry(
+            "hideArmorSystem",
+            false,
+            "Hide equipped armor pieces?",
+            "Hides equipped armor, such as bone or creepy armor."
             );
         
         // SomeEntry = Category.CreateEntry(
