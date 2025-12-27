@@ -342,7 +342,7 @@ public class ArmorMod : SonsMod
         {
             if (Config.useGloves.Value == true)
             {
-                __instance._playerAnimator.transform.root.Find("RaceSystem").GetComponent<PlayerRaceSystem>().HideArms(true);
+                __instance._playerAnimator.transform.GetParent().Find("RaceSystem").GetComponent<PlayerRaceSystem>().HideArms(true);                
             }
         }
     }    
@@ -530,14 +530,14 @@ private static class JacketChangePatch
                 var PlayerNameVar = __instance.transform.Find("PlayerName");
                 var NameTagModel = PlayerNameVar.FindChild("NameTagModel");
                 var NameTagConstraint = NameTagModel.GetComponent<ParentConstraint>();
-                if (NameTagConstraint.sourceCount == 2)
+                if (NameTagConstraint && NameTagConstraint.sourceCount == 2)
                 {
                     NameTagConstraintSource = NameTagConstraint.GetSource(1);
                     NameTagConstraint.RemoveSourceInternal(0);
                 }
                 else
                 {
-                    NameTagConstraintSource = NameTagConstraint.GetSource(0);
+                    NameTagConstraintSource = NameTagConstraint?.GetSource(0);
                 }
 
                 if (NameTagConstraintSource == null || NameTagConstraint.sourceCount == 0)
