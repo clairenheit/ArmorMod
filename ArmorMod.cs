@@ -549,8 +549,11 @@ private static class JacketChangePatch
                     NameTagConstraintSource.weight = 1;
                     NameTagConstraintSource.m_Weight = 1;
                 }
-                NameTagConstraint.SetRotationOffset(0, RotationOffset);
-                NameTagConstraint.SetTranslationOffset(0, TranslationOffset);
+                if (NameTagConstraint)
+                {
+                    NameTagConstraint.SetRotationOffset(0, RotationOffset);
+                    NameTagConstraint.SetTranslationOffset(0, TranslationOffset);
+                }
                 var PlayerNameLink = __instance.GetComponent<CoopPlayerRemoteSetup>();
                 var RemotePlayerUsername = PlayerNameLink._cachedPlayerName;
                 var RemotePlayerUsername2 = PlayerNameVar.GetComponent<PlayerNameUiLink>()._playerName;
