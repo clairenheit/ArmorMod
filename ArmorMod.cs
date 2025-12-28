@@ -57,9 +57,6 @@ public class ArmorMod : SonsMod
     public static bool ModInitialized = false;
     public GameObject[] PlayerNets;
     public static Material HelmetMaterial;
-    public static Vector3 TranslationOffset = new Vector3(0.0f, 0.0736f, 0.0859f);
-    public static Vector3 RotationOffset = new Vector3(60f, 0f, 0f);
-    public static Vector3 TranslationRest = new Vector3(0f, -0.45f, 0.15f);
     public static VailActor Robby;
     public static SkinnedMeshRenderer RobbyHelmetRenderer;
     public static GameObject RobbyGloves;
@@ -503,8 +500,11 @@ private static class JacketChangePatch
             var NewJacket = ClothingSystem.transform.Find("TacticalJacket").GetComponent<SkinnedMeshRenderer>();
             var Spine2Ref = Hips.FindDeepChild("Spine2");
             var TactiBodyArmor = OldSkin.transform.Find("tacti_body_armor1").GetComponent<SkinnedMeshRenderer>();
+            var TranslationOffset = new Vector3(0.0f, 0.0736f, 0.0859f);
+            var RotationOffset = new Vector3(60f, 0f, 0f);
+            var TranslationRest = new Vector3(0f, -0.45f, 0.15f);
 
-            var OldJacketBones = OldJacket.bones.ToList();
+        var OldJacketBones = OldJacket.bones.ToList();
             OldJacketBones[0] = Hips;
             var OldJacketBonesNew = OldJacketBones.ToArray();
             OldJacket.bones = OldJacketBonesNew;
@@ -528,31 +528,54 @@ private static class JacketChangePatch
             {
                 ConstraintSource NameTagConstraintSource;
                 var PlayerNameVar = __instance.transform.Find("PlayerName");
+                if (PlayerNameVar)
+                {
+                    RLog.Msg("Found player name object");
+                }
                 var NameTagModel = PlayerNameVar.FindChild("NameTagModel");
+                if (NameTagModel)
+                {
+                    RLog.Msg("Found name tag model object");
+                }
                 var NameTagConstraint = NameTagModel.GetComponent<ParentConstraint>();
+                if (NameTagConstraint)
+                {
+                    RLog.Msg("Found name tag parent constraint");
+                }
                 if (NameTagConstraint && NameTagConstraint.sourceCount == 2)
                 {
                     NameTagConstraintSource = NameTagConstraint.GetSource(1);
                     NameTagConstraint.RemoveSourceInternal(0);
+                    RLog.Msg("Removed extra invalid source on NameTagConstraint");
                 }
                 else
                 {
                     NameTagConstraintSource = NameTagConstraint?.GetSource(0);
+                    RLog.Msg("Found and set NameTagConstraintSource");
                 }
 
                 if (NameTagConstraintSource == null || NameTagConstraint.sourceCount == 0)
                 {
+                    RLog.Msg("NameTagConstraintSource is null, creating new source");
+                    if (NameTagConstraint == null)
+                    {
+                        NameTagModel.gameObject.AddComponent<ParentConstraint>();
+                    }
                     NameTagConstraint.SetSource(0, new ConstraintSource());
                     NameTagConstraintSource = NameTagConstraint.GetSource(0);
                     NameTagConstraintSource.sourceTransform = Spine2Ref;
                     NameTagConstraintSource.m_SourceTransform = Spine2Ref;
                     NameTagConstraintSource.weight = 1;
                     NameTagConstraintSource.m_Weight = 1;
+                    NameTagConstraint.SetRotationOffset(0, RotationOffset);
+                    NameTagConstraint.SetTranslationOffset(0, TranslationOffset);
+                    RLog.Msg("New NameTagConstraintSource created successfully");
                 }
-                if (NameTagConstraint)
+                else
                 {
                     NameTagConstraint.SetRotationOffset(0, RotationOffset);
                     NameTagConstraint.SetTranslationOffset(0, TranslationOffset);
+                    RLog.Msg("Applied name tag constraint offsets");
                 }
                 var PlayerNameLink = __instance.GetComponent<CoopPlayerRemoteSetup>();
                 var RemotePlayerUsername = PlayerNameLink._cachedPlayerName;
@@ -593,7 +616,7 @@ private static class JacketChangePatch
             if (Config.enableHelmet.Value == true)
                 {
                     Hemlet.gameObject.SetActive(true);
-                __instance.transform.Find("RaceSystem").FindDeepChild("Hair").gameObject.SetActive(false);
+                __instance.transform.Find("RaceSystem").FindDeepChild("Hair")?.gameObject?.SetActive(false);
                 HemletRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
             }
                 if (Config.cutsceneHelmet.Value == true)
@@ -607,7 +630,7 @@ private static class JacketChangePatch
             if (Config.useMasks.Value == true)
             {
                 ApplyMask(__instance.transform);
-                __instance.transform.Find("RaceSystem").FindDeepChild("Hair").gameObject.SetActive(false);
+                __instance.transform.Find("RaceSystem").FindDeepChild("Hair")?.gameObject?.SetActive(false);
                 if (RaceSystem._race != PlayerRace.Race.White && RaceSystem._race != PlayerRace.Race.Latin)
                 {
                     RaceSystem.ApplyRace(PlayerRace.Race.Latin);
